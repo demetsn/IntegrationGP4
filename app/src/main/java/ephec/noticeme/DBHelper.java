@@ -102,7 +102,7 @@ public class DBHelper extends SQLiteOpenHelper
         if (cursor.moveToFirst()) {
             cursor.moveToFirst();
 
-            alarm.setID((cursor.getInt(cursor.getColumnIndex(COlUMN_ID))));
+            alarm.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_ID))));
             alarm.setGroupId((cursor.getInt(cursor.getColumnIndex(COLUMN_GROUP_ID))));
             alarm.setModificationDate((cursor.getString(cursor.getColumnIndex(COLUMN_MODIF_DATE))));
             alarm.setTitle((cursor.getString(cursor.getColumnIndex(COLUMN_TITLE))));
@@ -119,28 +119,31 @@ public class DBHelper extends SQLiteOpenHelper
         return alarm;
     }
 
-    public boolean deletePlace(String name) {
+
+    public boolean deleteAlarm(int id) {
 
         boolean result = false;
 
-        String query = "Select * FROM " + TABLE_PLACE + " WHERE " + COLUMN_NAME + " =  \"" + name + "\"";
+        String query = "Select * FROM " + TABLE_ALARMS + " WHERE " + COlUMN_ID + " =  \"" + id + "\"";
 
         SQLiteDatabase db = this.getWritableDatabase();
 
         Cursor cursor = db.rawQuery(query, null);
 
-        Place place = new Place();
+        Alarm alarm = new Alarm();
 
         if (cursor.moveToFirst()) {
-            place.setID(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COlUMN_ID))));
-            db.delete(TABLE_PLACE, COlUMN_ID + " = ?",
-                    new String[]{String.valueOf(place.getID())});
+            alarm.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_ID))));
+            db.delete(TABLE_ALARMS, COlUMN_ID + " = ?",
+                    new String[]{String.valueOf(alarm.getId())});
             cursor.close();
             result = true;
         }
         db.close();
         return result;
     }
+
+    //TODO//
 
     public boolean modifyPlace(String name, Place place) {
 
