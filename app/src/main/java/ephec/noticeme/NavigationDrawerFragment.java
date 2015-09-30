@@ -1,5 +1,6 @@
 package ephec.noticeme;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
 import android.support.v7.app.ActionBar;
@@ -198,6 +199,18 @@ public class NavigationDrawerFragment extends Fragment {
         }
         if (mCallbacks != null) {
             mCallbacks.onNavigationDrawerItemSelected(position);
+        }
+        if(position == 0){
+            //TODO : define an activity for the list
+        }
+        if(position == 1){
+            //TODO : define an activity to create a memo
+            Intent intent = new Intent(this.getActivity() , LoginActivity.class);
+            startActivity(intent);
+        }
+        if (position == 2){
+            Intent intent = new Intent(this.getActivity() , MapsActivity.class);
+            startActivity(intent);
         }
     }
 
