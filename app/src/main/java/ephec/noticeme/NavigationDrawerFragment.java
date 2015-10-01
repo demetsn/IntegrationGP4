@@ -204,8 +204,8 @@ public class NavigationDrawerFragment extends Fragment {
             //TODO : define an activity for the list
         }
         if(position == 1){
-            //TODO : define an activity to create a memo
-            Intent intent = new Intent(this.getActivity() , LoginActivity.class);
+
+            Intent intent = new Intent(this.getActivity() , AddMemoActivity.class);
             startActivity(intent);
         }
         if (position == 2){

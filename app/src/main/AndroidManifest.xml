@@ -47,11 +47,15 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" >
-    </activity>
+        </activity>
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login"
             android:windowSoftInputMode="adjustResize|stateVisible" >
+        </activity>
+        <activity
+            android:name=".AddMemoActivity"
+            android:label="@string/title_activity_add_memo" >
         </activity>
     </application>
 
