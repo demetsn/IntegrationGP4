@@ -29,7 +29,7 @@ public class DBHelper extends SQLiteOpenHelper
     private static final String COLUMN_LONGITUDE = "longitude";
     private static final String COLUMN_ALARM_DATE = "alarmDate";
 
-    private static final String REQUETE_CREATION_PLACE = "create table "
+    private static final String REQUETE_CREATION_ALARM = "create table "
             + TABLE_ALARMS + " ( "
             + COlUMN_ID + " integer primary key not null,"
             + COLUMN_GROUP_ID + " integer , "
@@ -48,7 +48,7 @@ public class DBHelper extends SQLiteOpenHelper
     @Override
     public void onCreate(SQLiteDatabase db)
     {
-        db.execSQL(REQUETE_CREATION_PLACE);
+        db.execSQL(REQUETE_CREATION_ALARM);
     }
 
     @Override
