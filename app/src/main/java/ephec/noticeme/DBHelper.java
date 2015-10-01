@@ -1,3 +1,7 @@
+/**
+ * Created by Olivier on 29-09-15.
+ */
+
 package ephec.noticeme;
 
 import android.content.ContentValues;
@@ -8,10 +12,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
-
-/**
- * Created by Olivier on 29-09-15.
- */
 
 public class DBHelper extends SQLiteOpenHelper
 {
@@ -143,48 +143,55 @@ public class DBHelper extends SQLiteOpenHelper
         return result;
     }
 
-    //TODO//
 
-    public boolean modifyPlace(String name, Place place) {
+    public boolean modifyAlarm(String name, Alarm alarm) {
 
         boolean result = false;
 
         ContentValues values = new ContentValues();
 
-        values.put(COLUMN_NAME, place.getName());
-        values.put(COLUMN_DESCRIPTION, place.getDescription());
-        values.put(COLUMN_CITY, place.getCity());
-        values.put(COLUMN_CATEGORY, place.getCategory());
-        values.put(COLUMN_ADDRESS, place.getAddress());
-        values.put(COLUMN_PHONE, place.getPhone());
-        values.put(COLUMN_LATITUDE, place.getLatitude());
-        values.put(COLUMN_LONGITUDE, place.getLongitude());
+        values.put(COlUMN_ID, alarm.getId());
+        values.put(COLUMN_GROUP_ID, alarm.getGroupId());
+        values.put(COLUMN_MODIF_DATE, alarm.getModificationDate());
+        values.put(COLUMN_TITLE, alarm.getTitle());
+        values.put(COLUMN_DESCRIPTION, alarm.getDescription());
+        values.put(COLUMN_LATITUDE, alarm.getLatitude());
+        values.put(COLUMN_LONGITUDE, alarm.getLongitude());
+        values.put(COLUMN_ALARM_DATE, alarm.getAlarmDate());
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.update(TABLE_PLACE, values, COlUMN_ID + "=" + place.getID(), null);
+        db.update(TABLE_ALARMS, values, COlUMN_ID + "=" + alarm.getId(), null);
 
         result = true;
         return result;
     }
 
-    public ArrayList<Place> getAllNames(String select, String search){
+    public ArrayList<Alarm> getAllTitles(String select, String search){
 
-        ArrayList<Place> places = new ArrayList<Place>();
+        ArrayList<Alarm> alarms = new ArrayList<Alarm>();
 
         String query = "";
 
         switch (select) {
-            case COLUMN_NAME : query = query + "SELECT * FROM " + TABLE_PLACE ;
+
+            case COlUMN_ID : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COlUMN_ID + " = \"" + search + "\"";
                 break;
-            case COLUMN_CATEGORY : query = query + "SELECT * FROM " + TABLE_PLACE + " WHERE " + COLUMN_CATEGORY + " = \"" + search + "\"";
+            case COLUMN_GROUP_ID : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_GROUP_ID + " = \"" + search + "\"";
                 break;
-            case COLUMN_CITY : query = query + "SELECT * FROM " + TABLE_PLACE + " WHERE " + COLUMN_CITY + " = \"" + search + "\"";
+            case COLUMN_MODIF_DATE : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_MODIF_DATE + " = \"" + search + "\"";
                 break;
-            case COLUMN_DESCRIPTION : query = query + "SELECT * FROM " + TABLE_PLACE + " WHERE " + COLUMN_DESCRIPTION + " = \"%" + search + "%\"";
+            case COLUMN_TITLE : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_TITLE + " = \"" + search + "\"";
                 break;
-            case COLUMN_ADDRESS : query = query + "SELECT * FROM " + TABLE_PLACE + " WHERE " + COLUMN_ADDRESS + " = \"%" + search + "%\"";
+            case COLUMN_DESCRIPTION : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_DESCRIPTION + " = \"" + search + "\"";
                 break;
+            case COLUMN_LATITUDE : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_LATITUDE + " = \"" + search + "\"";
+                break;
+            case COLUMN_LONGITUDE : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_LONGITUDE + " = \"" + search + "\"";
+                break;
+            case COLUMN_ALARM_DATE : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_ALARM_DATE + " = \"" + search + "\"";
+                break;
+
         }
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -194,26 +201,26 @@ public class DBHelper extends SQLiteOpenHelper
         if (cursor.moveToFirst()) {
 
             while (cursor.isAfterLast() == false) {
-                Place place = new Place();
+                Alarm alarm = new Alarm();
 
-                place.setName(cursor.getString(cursor.getColumnIndex(COLUMN_NAME)));
-                place.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
-                place.setCity(cursor.getString(cursor.getColumnIndex(COLUMN_CITY)));
-                place.setCategory(cursor.getString(cursor.getColumnIndex(COLUMN_CATEGORY)));
-                place.setAddress(cursor.getString(cursor.getColumnIndex(COLUMN_ADDRESS)));
-                place.setPhone(cursor.getString(cursor.getColumnIndex(COLUMN_PHONE)));
-                place.setLatitude(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_LATITUDE))));
-                place.setLongitude(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_LONGITUDE))));
+                alarm.setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COlUMN_ID))));
+                alarm.setGroupId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_GROUP_ID))));
+                alarm.setModificationDate(cursor.getString(cursor.getColumnIndex(COLUMN_MODIF_DATE)));
+                alarm.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
+                alarm.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
+                alarm.setLatitude(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_LATITUDE))));
+                alarm.setLongitude(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_LONGITUDE))));
+                alarm.setAlarmDate(cursor.getString(cursor.getColumnIndex(COLUMN_ALARM_DATE)));
 
                 cursor.moveToNext();
 
-                places.add(place);
+                alarms.add(alarm);
             }
             cursor.close();
         }
 
         db.close();
 
-        return places;
+        return alarms;
     }
 }
