@@ -1,5 +1,6 @@
 package ephec.noticeme;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
@@ -122,12 +123,14 @@ public class MainActivity extends AppCompatActivity
             newFragment = new AddMemo();
         } else if (id == R.id.nav_maps) {
             newFragment = new MapFragment();
-        } else if (id == R.id.nav_settings) {
-            //newFragment = new ();
         } else if (id == R.id.nav_profile) {
-            //newFragment = new ();
+            newFragment = new Profile();
+        } else if (id == R.id.nav_settings) {
+            Intent intent = new Intent(this,SettingsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_edit) {
-            //newFragment = new ();
+            Intent intent = new Intent(this,EditProfile.class);
+            startActivity(intent);
         }
         if (newFragment != null) {
             // Replace whatever is in the fragment_container view with this fragment,
