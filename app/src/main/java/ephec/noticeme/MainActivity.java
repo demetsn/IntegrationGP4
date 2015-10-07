@@ -1,7 +1,7 @@
 package ephec.noticeme;
 
 import android.support.v4.app.Fragment;
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -18,7 +18,7 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+    public static FragmentManager fragmentManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        fragmentManager = getSupportFragmentManager();
         // Check that the activity is using the layout version with
         // the fragment_container FrameLayout
         if (findViewById(R.id.fragment_container) != null) {
@@ -53,8 +54,13 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Button to add a memo", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                //Snackbar.make(view, "Button to add a memo", Snackbar.LENGTH_LONG)
+                  //      .setAction("Action", null).show();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                AddMemo fragment = new AddMemo();
+                transaction.replace(R.id.fragment_container, fragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 
@@ -66,9 +72,6 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-
     }
 
     @Override
@@ -115,11 +118,10 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_list) {
             newFragment = new MemoList();
-
         } else if (id == R.id.nav_add) {
-            //newFragment = new ();
+            newFragment = new AddMemo();
         } else if (id == R.id.nav_maps) {
-            //newFragment = new ();
+            newFragment = new MapFragment();
         } else if (id == R.id.nav_settings) {
             //newFragment = new ();
         } else if (id == R.id.nav_profile) {
