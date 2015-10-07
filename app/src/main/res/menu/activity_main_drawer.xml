@@ -10,15 +10,15 @@
             android:title="Maps" />
         <item android:id="@+id/nav_manage" android:icon="@android:drawable/ic_menu_manage"
             android:title="Settings" />
-    </group>
 
-    <item android:title="Profile">
-        <menu>
-            <item android:id="@+id/nav_share" android:icon="@drawable/ic_action_user"
-                android:title="View my profile" />
-            <item android:id="@+id/nav_send" android:icon="@android:drawable/ic_menu_edit"
-                android:title="Edit Profile" />
-        </menu>
-    </item>
+        <item android:title="Profile">
+            <menu>
+                <item android:id="@+id/nav_share" android:icon="@drawable/ic_action_user"
+                    android:title="View my profile" />
+                <item android:id="@+id/nav_send" android:icon="@android:drawable/ic_menu_edit"
+                    android:title="Edit Profile" />
+            </menu>
+        </item>
+    </group>
 
 </menu>
