@@ -31,6 +31,11 @@
         completions."
     </string>
 
+    <!-- Strings related to addMemo -->
+    <string name="addMemoTitle">Title</string>
+    <string name="addMemoDescription">Your memo</string>
+    <string name="addMemoChooseDate">Choose a date</string>
+
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_settings">Settings</string>

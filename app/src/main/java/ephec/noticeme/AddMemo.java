@@ -1,12 +1,25 @@
 package ephec.noticeme;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.FragmentContainer;
+import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.TextView;
+
+import java.util.Calendar;
 
 
 /**
@@ -17,7 +30,7 @@ import android.view.ViewGroup;
  * Use the {@link AddMemo#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AddMemo extends Fragment {
+public class AddMemo extends Fragment implements View.OnClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -26,6 +39,15 @@ public class AddMemo extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private TextView title;
+    private TextView desciption;
+    private Button chooseDate;
+    private static TextView textDate;
+
+    private Calendar calendar;
+    private int year, month, day;
+    private DatePickerDialog datePickerDialog;
 
     private OnFragmentInteractionListener mListener;
 
@@ -58,13 +80,17 @@ public class AddMemo extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_add_memo, container, false);
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -97,4 +123,15 @@ public class AddMemo extends Fragment {
         public void onFragmentInteraction(Uri uri);
     }
 
+    public void onClick(View v) throws NullPointerException {
+
+        switch (v.getId()) {
+            case R.id.memo_textDate:
+
+                datePickerDialog.show();
+
+                break;
+
+        }
+    }
 }

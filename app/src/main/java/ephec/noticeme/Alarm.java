@@ -12,6 +12,7 @@
         private String description;
         private float latitude;
         private float longitude;
+        private String alarmDate;
 
         public Alarm() {
         }
@@ -90,7 +91,5 @@
         public void setGroupId(int groupId) {
             this.groupId = groupId;
         }
-
-        private String alarmDate;
 
     }

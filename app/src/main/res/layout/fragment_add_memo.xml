@@ -1,9 +1,50 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" tools:context="ephec.noticeme.AddMemo">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView android:layout_width="match_parent" android:layout_height="match_parent"
-        android:text="Add memo fragment" />
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/scrollView">
 
-</FrameLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="5dp">
+
+            <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/memo_title"
+                android:inputType="textNoSuggestions"
+                android:hint="@string/addMemoTitle"
+                android:textColorHint="@color/lightGrey"
+                android:layout_marginTop="5dp" />
+
+            <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/memo_description"
+                android:inputType="textMultiLine"
+                android:lines="4"
+                android:hint="@string/addMemoDescription"
+                android:layout_below="@+id/memo_title"
+                android:textColorHint="@color/lightGrey"
+                android:ems="10" />
+
+            <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/memo_textDate"
+                android:layout_below="@+id/memo_description"
+                android:hint="@string/addMemoChooseDate"/>
+
+        </RelativeLayout>
+
+    </ScrollView>
+
+
+
+</RelativeLayout>
