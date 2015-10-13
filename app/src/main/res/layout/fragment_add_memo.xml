@@ -39,7 +39,8 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/memo_textDate"
                 android:layout_below="@+id/memo_description"
-                android:hint="@string/addMemoChooseDate"/>
+                android:hint="@string/addMemoChooseDate"
+                android:textColorHint="@color/lightGrey"/>
 
         </RelativeLayout>
 

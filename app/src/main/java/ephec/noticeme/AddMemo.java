@@ -94,6 +94,12 @@ public class AddMemo extends Fragment implements View.OnClickListener{
         this.date = (TextView) view.findViewById(R.id.memo_textDate);
         this.date.setOnClickListener(this);
         date.setText("test");
+
+        final Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
+
         return view;
 
     }
@@ -133,7 +139,18 @@ public class AddMemo extends Fragment implements View.OnClickListener{
         switch (v.getId()) {
             case R.id.memo_textDate:
 
-                datePickerDialog.show();
+                DatePickerDialog dpd = new DatePickerDialog(getActivity(),
+                        new DatePickerDialog.OnDateSetListener() {
+
+                            @Override
+                            public void onDateSet(DatePicker view, int thisYear,
+                                                  int monthOfYear, int dayOfMonth) {
+                                date.setText(dayOfMonth + "-"
+                                        + (monthOfYear + 1) + "-" + thisYear);
+
+                            }
+                        }, year, month, day);
+                dpd.show();
 
                 break;
 
