@@ -41,9 +41,9 @@ public class AddMemo extends Fragment implements View.OnClickListener{
     private String mParam2;
 
     private TextView title;
-    private TextView desciption;
-    private Button chooseDate;
-    private static TextView textDate;
+    private TextView description;
+    private TextView date;
+
 
     private Calendar calendar;
     private int year, month, day;
@@ -80,16 +80,21 @@ public class AddMemo extends Fragment implements View.OnClickListener{
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_add_memo, container, false);
+        View view = inflater.inflate(R.layout.fragment_add_memo, container, false);
+
+        this.title = (TextView) view.findViewById(R.id.memo_title);
+        this.description = (TextView) view.findViewById(R.id.memo_description);
+        this.date = (TextView) view.findViewById(R.id.memo_textDate);
+        this.date.setOnClickListener(this);
+        date.setText("test");
+        return view;
 
     }
 
