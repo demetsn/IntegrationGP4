@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentContainer;
 import android.app.FragmentTransaction;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import java.util.Calendar;
 
@@ -43,10 +45,8 @@ public class AddMemo extends Fragment implements View.OnClickListener{
     private TextView title;
     private TextView description;
     private TextView date;
+    private TextView time;
 
-
-    private Calendar calendar;
-    private int year, month, day;
     private DatePickerDialog datePickerDialog;
 
     private OnFragmentInteractionListener mListener;
@@ -93,12 +93,8 @@ public class AddMemo extends Fragment implements View.OnClickListener{
         this.description = (TextView) view.findViewById(R.id.memo_description);
         this.date = (TextView) view.findViewById(R.id.memo_textDate);
         this.date.setOnClickListener(this);
-        date.setText("test");
-
-        final Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int day = c.get(Calendar.DAY_OF_MONTH);
+        this.time = (TextView) view.findViewById(R.id.memo_textTime);
+        this.time.setOnClickListener(this);
 
         return view;
 
@@ -139,6 +135,12 @@ public class AddMemo extends Fragment implements View.OnClickListener{
         switch (v.getId()) {
             case R.id.memo_textDate:
 
+                Calendar c = Calendar.getInstance();
+
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
                 DatePickerDialog dpd = new DatePickerDialog(getActivity(),
                         new DatePickerDialog.OnDateSetListener() {
 
@@ -153,6 +155,25 @@ public class AddMemo extends Fragment implements View.OnClickListener{
                 dpd.show();
 
                 break;
+
+            case R.id.memo_textTime:
+
+                Calendar calendar = Calendar.getInstance();
+                int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                int minutes = calendar.get(Calendar.MINUTE);
+
+                TimePickerDialog tpd = new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
+
+                            @Override
+                            public void onTimeSet(TimePicker view, int thisHour, int thisMinute) {
+                                time.setText(thisHour+":"+thisMinute);
+
+                            }
+                        }, hour, minutes, true);
+                tpd.show();
+
+                break;
+
 
         }
     }

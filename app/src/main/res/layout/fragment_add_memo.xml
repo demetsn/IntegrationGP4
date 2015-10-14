@@ -5,7 +5,8 @@
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:id="@+id/scrollView">
+        android:id="@+id/scrollView"
+        android:fadeScrollbars="false">
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -39,7 +40,19 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/memo_textDate"
                 android:layout_below="@+id/memo_description"
+                android:lines="1"
+                android:maxLines="1"
                 android:hint="@string/addMemoChooseDate"
+                android:textColorHint="@color/lightGrey"/>
+
+            <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/memo_textTime"
+                android:layout_below="@+id/memo_textDate"
+                android:lines="1"
+                android:maxLines="1"
+                android:hint="@string/addMemoChooseTime"
                 android:textColorHint="@color/lightGrey"/>
 
         </RelativeLayout>
