@@ -8,11 +8,15 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 
 /**
@@ -37,6 +41,7 @@ public class AddMemo extends Fragment implements View.OnClickListener{
     private TextView description;
     private TextView date;
     private TextView time;
+    private Button save;
 
     private OnFragmentInteractionListener mListener;
 
@@ -84,6 +89,8 @@ public class AddMemo extends Fragment implements View.OnClickListener{
         this.date.setOnClickListener(this);
         this.time = (TextView) view.findViewById(R.id.memo_textTime);
         this.time.setOnClickListener(this);
+        this.save = (Button) view.findViewById(R.id.memo_save_button);
+        this.save.setOnClickListener(this);
 
         return view;
 
@@ -163,6 +170,33 @@ public class AddMemo extends Fragment implements View.OnClickListener{
 
                 break;
 
+            case R.id.memo_save_button:
+
+                //TODO Check the memo datas to avoid SQL injections.
+
+
+                //At this point, we consider the possible SQL injections, avoided.
+                Alarm memo = new Alarm();
+
+                memo.setTitle(title.getText().toString());
+                memo.setDescription(description.getText().toString());
+                memo.setAlarmDate(date.getText().toString() + time.getText().toString()); //Pas top on a xx/yy/zzzzAA:BB
+
+                break;
+
         }
+    }
+
+    public Date convertDate(String dateString) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm");
+        Date convertedDate = new Date();
+        try {
+            convertedDate = dateFormat.parse(dateString);
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return convertedDate;
     }
 }

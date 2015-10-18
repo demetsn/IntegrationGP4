@@ -38,7 +38,7 @@ public class DBHelper extends SQLiteOpenHelper
             + COLUMN_DESCRIPTION + " , "
             + COLUMN_LATITUDE + " , "
             + COLUMN_LONGITUDE + " , "
-            + COLUMN_ALARM_DATE
+            + COLUMN_ALARM_DATE + " datetime, "
             + " ); ";
 
     public DBHelper(Context context) {
@@ -70,12 +70,12 @@ public class DBHelper extends SQLiteOpenHelper
 
         alarmValue.put(COlUMN_ID, alarm.getId());
         alarmValue.put(COLUMN_GROUP_ID, alarm.getGroupId());
-        alarmValue.put(COLUMN_MODIF_DATE, alarm.getModificationDate());
+        alarmValue.put(COLUMN_MODIF_DATE, (alarm.getModificationDate()));
         alarmValue.put(COLUMN_TITLE, alarm.getTitle());
         alarmValue.put(COLUMN_DESCRIPTION, alarm.getDescription());
         alarmValue.put(COLUMN_LATITUDE, alarm.getLatitude());
         alarmValue.put(COLUMN_LONGITUDE, alarm.getLongitude());
-        alarmValue.put(COLUMN_ALARM_DATE, alarm.getAlarmDate());
+        alarmValue.put(COLUMN_ALARM_DATE, (alarm.getAlarmDate()));
 
 
         SQLiteDatabase db = this.getWritableDatabase();
