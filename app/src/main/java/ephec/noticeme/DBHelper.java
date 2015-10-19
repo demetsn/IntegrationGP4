@@ -38,8 +38,7 @@ public class DBHelper extends SQLiteOpenHelper
             + COLUMN_DESCRIPTION + " , "
             + COLUMN_LATITUDE + " , "
             + COLUMN_LONGITUDE + " , "
-            + COLUMN_ALARM_DATE + " datetime, "
-            + " ); ";
+            + COLUMN_ALARM_DATE + " datetime ); ";
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -107,8 +106,8 @@ public class DBHelper extends SQLiteOpenHelper
             alarm.setModificationDate((cursor.getString(cursor.getColumnIndex(COLUMN_MODIF_DATE))));
             alarm.setTitle((cursor.getString(cursor.getColumnIndex(COLUMN_TITLE))));
             alarm.setDescription((cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION))));
-            alarm.setLatitude(Float.parseFloat(cursor.getString(cursor.getColumnIndex(COLUMN_LATITUDE))));
-            alarm.setLongitude(Float.parseFloat(cursor.getString(cursor.getColumnIndex(COLUMN_LONGITUDE))));
+            alarm.setLatitude(Double.parseDouble(cursor.getString(cursor.getColumnIndex(COLUMN_LATITUDE))));
+            alarm.setLongitude(Double.parseDouble(cursor.getString(cursor.getColumnIndex(COLUMN_LONGITUDE))));
             alarm.setAlarmDate((cursor.getString(cursor.getColumnIndex(COLUMN_ALARM_DATE))));
 
             cursor.close();
@@ -208,8 +207,8 @@ public class DBHelper extends SQLiteOpenHelper
                 alarm.setModificationDate(cursor.getString(cursor.getColumnIndex(COLUMN_MODIF_DATE)));
                 alarm.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
                 alarm.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
-                alarm.setLatitude(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_LATITUDE))));
-                alarm.setLongitude(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_LONGITUDE))));
+                alarm.setLatitude(Double.parseDouble(cursor.getString(cursor.getColumnIndex(COLUMN_LATITUDE))));
+                alarm.setLongitude(Double.parseDouble(cursor.getString(cursor.getColumnIndex(COLUMN_LONGITUDE))));
                 alarm.setAlarmDate(cursor.getString(cursor.getColumnIndex(COLUMN_ALARM_DATE)));
 
                 cursor.moveToNext();

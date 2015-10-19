@@ -12,11 +12,13 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 
 
 /**
@@ -180,23 +182,44 @@ public class AddMemo extends Fragment implements View.OnClickListener{
 
                 memo.setTitle(title.getText().toString());
                 memo.setDescription(description.getText().toString());
-                memo.setAlarmDate(date.getText().toString() + time.getText().toString()); //Pas top on a xx/yy/zzzzAA:BB
+                memo.setAlarmDate(date.getText().toString() + "|" + time.getText().toString()); //Pas top on a xx/yy/zzzz|AA:BB
+                memo.setModificationDate(getActualTime());
+
+                //valeurs test
+                memo.setLatitude(0.0);
+                memo.setLongitude(0.0);
+                Random rn1 = new Random();
+                memo.setId(rn1.nextInt(10000));
+                memo.setGroupId(0);
+
+                DBHelper db = new DBHelper(getActivity());
+
+                if(db.addAlarm(memo))
+                {
+                    Toast toast = Toast.makeText(getActivity(), "Memo enregistré", Toast.LENGTH_LONG);
+                    toast.show();
+                }
 
                 break;
 
         }
+
     }
 
-    public Date convertDate(String dateString) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm");
-        Date convertedDate = new Date();
-        try {
-            convertedDate = dateFormat.parse(dateString);
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    public String getActualTime()
+    {
+        String now;
 
-        return convertedDate;
+        Calendar cal = Calendar.getInstance();
+
+        int thisYear = cal.get(Calendar.YEAR);
+        int thisMonth = cal.get(Calendar.MONTH);
+        int today = cal.get(Calendar.DAY_OF_MONTH);
+        int thisHour = cal.get(Calendar.HOUR_OF_DAY);
+        int thisMinute = cal.get(Calendar.MINUTE);
+
+        now = today+"/"+thisMonth+"/"+thisYear+"|"+thisHour+":"+thisMinute;
+
+        return now;
     }
 }
