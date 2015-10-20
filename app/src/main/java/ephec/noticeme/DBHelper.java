@@ -166,31 +166,45 @@ public class DBHelper extends SQLiteOpenHelper
         return result;
     }
 
-    public ArrayList<Alarm> getAllTitles(String select, String search){
+    public ArrayList<String> getAllTitles(String select, String search){
 
-        ArrayList<Alarm> alarms = new ArrayList<Alarm>();
+        ArrayList<String> alarms = new ArrayList<String>();
 
         String query = "";
 
-        switch (select) {
+        if(search == "")
+        {
+            query = query + "SELECT * FROM "+TABLE_ALARMS;
+        }
+        else {
+            switch (select) {
 
-            case COlUMN_ID : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COlUMN_ID + " = \"" + search + "\"";
-                break;
-            case COLUMN_GROUP_ID : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_GROUP_ID + " = \"" + search + "\"";
-                break;
-            case COLUMN_MODIF_DATE : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_MODIF_DATE + " = \"" + search + "\"";
-                break;
-            case COLUMN_TITLE : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_TITLE + " = \"" + search + "\"";
-                break;
-            case COLUMN_DESCRIPTION : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_DESCRIPTION + " = \"" + search + "\"";
-                break;
-            case COLUMN_LATITUDE : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_LATITUDE + " = \"" + search + "\"";
-                break;
-            case COLUMN_LONGITUDE : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_LONGITUDE + " = \"" + search + "\"";
-                break;
-            case COLUMN_ALARM_DATE : query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_ALARM_DATE + " = \"" + search + "\"";
-                break;
+                case COlUMN_ID:
+                    query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COlUMN_ID + " = \"" + search + "\"";
+                    break;
+                case COLUMN_GROUP_ID:
+                    query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_GROUP_ID + " = \"" + search + "\"";
+                    break;
+                case COLUMN_MODIF_DATE:
+                    query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_MODIF_DATE + " = \"" + search + "\"";
+                    break;
+                case COLUMN_TITLE:
+                    query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_TITLE + " = \"" + search + "\"";
+                    break;
+                case COLUMN_DESCRIPTION:
+                    query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_DESCRIPTION + " = \"" + search + "\"";
+                    break;
+                case COLUMN_LATITUDE:
+                    query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_LATITUDE + " = \"" + search + "\"";
+                    break;
+                case COLUMN_LONGITUDE:
+                    query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_LONGITUDE + " = \"" + search + "\"";
+                    break;
+                case COLUMN_ALARM_DATE:
+                    query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_ALARM_DATE + " = \"" + search + "\"";
+                    break;
 
+            }
         }
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -202,18 +216,19 @@ public class DBHelper extends SQLiteOpenHelper
             while (cursor.isAfterLast() == false) {
                 Alarm alarm = new Alarm();
 
-                alarm.setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COlUMN_ID))));
-                alarm.setGroupId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_GROUP_ID))));
-                alarm.setModificationDate(cursor.getString(cursor.getColumnIndex(COLUMN_MODIF_DATE)));
+                //alarm.setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COlUMN_ID))));
+                //alarm.setGroupId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_GROUP_ID))));
+                //alarm.setModificationDate(cursor.getString(cursor.getColumnIndex(COLUMN_MODIF_DATE)));
                 alarm.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
-                alarm.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
-                alarm.setLatitude(Double.parseDouble(cursor.getString(cursor.getColumnIndex(COLUMN_LATITUDE))));
-                alarm.setLongitude(Double.parseDouble(cursor.getString(cursor.getColumnIndex(COLUMN_LONGITUDE))));
-                alarm.setAlarmDate(cursor.getString(cursor.getColumnIndex(COLUMN_ALARM_DATE)));
+                //alarm.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
+                //alarm.setLatitude(Double.parseDouble(cursor.getString(cursor.getColumnIndex(COLUMN_LATITUDE))));
+                //alarm.setLongitude(Double.parseDouble(cursor.getString(cursor.getColumnIndex(COLUMN_LONGITUDE))));
+                //alarm.setAlarmDate(cursor.getString(cursor.getColumnIndex(COLUMN_ALARM_DATE)));
 
                 cursor.moveToNext();
 
-                alarms.add(alarm);
+                alarms.add(alarm.getTitle());
+
             }
             cursor.close();
         }

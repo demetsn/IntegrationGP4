@@ -202,9 +202,13 @@ public class AddMemo extends Fragment implements View.OnClickListener{
 
                 if(db.addAlarm(memo))
                 {
-                    /*Toast toast = Toast.makeText(getActivity(), "Memo enregistré", Toast.LENGTH_LONG);
-                    toast.show();*/
+                    //Toast toast = Toast.makeText(getActivity(), "Memo enregistré", Toast.LENGTH_LONG);
+                    //toast.show();
+
                     launchNotification();
+
+                    Intent save = new Intent(getActivity(), MainActivity.class);
+                    startActivity(save);
                 }
 
                 break;

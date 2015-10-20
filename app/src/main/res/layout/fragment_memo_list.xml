@@ -3,7 +3,11 @@
     android:layout_height="match_parent" tools:context="ephec.noticeme.MemoList">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView android:layout_width="match_parent" android:layout_height="match_parent"
-        android:text="Memo List" />
+    <ListView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/memoList"
+        android:choiceMode="singleChoice">
+    </ListView>
 
 </FrameLayout>
