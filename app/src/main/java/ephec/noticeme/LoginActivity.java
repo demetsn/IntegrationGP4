@@ -334,7 +334,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 System.out.println("Login fail!");
                 return false;
             }
-
+            //TODO : register user
             return false;
         }
 
