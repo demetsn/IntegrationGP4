@@ -27,6 +27,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -262,9 +271,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-            //String response;
+            String response;
             try {
-                /*URL url= new URL("superpie.ddns.net/logindroid");
+                MessageDigest digest = MessageDigest.getInstance("SHA-512");
+                byte[] hash = digest.digest(mPassword.getBytes("UTF-8"));
+                StringBuffer hexString = new StringBuffer();
+                for (int i = 0; i < hash.length; i++) {
+                    String hex = Integer.toHexString(0xff & hash[i]);
+                    if(hex.length() == 1) hexString.append('0');
+                    hexString.append(hex);
+                }
+                String hashed = hexString.toString();
+
+                URL url= new URL("http://superpie.ddns.net:8035/NoticeMe/web/app_dev.php/android/login");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setReadTimeout(10000);
                 conn.setConnectTimeout(15000);
@@ -272,7 +291,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
                 Uri.Builder builder = new Uri.Builder().appendQueryParameter("username",mEmail)
-                                                .appendQueryParameter("password",mPassword);
+                                                .appendQueryParameter("password",hashed);
                 String query = builder.build().getEncodedQuery();
                 OutputStream os = conn.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,"UTF-8"));
@@ -290,23 +309,33 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 bufferedReader.close();
                 inputStream.close();
                 conn.disconnect();
-                */
+
                 // Simulate network access.
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 return false;
+            } catch (Exception e){
+                System.out.println("Une exeption s'est produite : "+e);
+                return false;
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
+            /*for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
                 if (pieces[0].equals(mEmail)) {
                     // Account exists, return true if the password matches.
                     return pieces[1].equals(mPassword);
                 }
+            }*/
+
+            if(response.equals("1")){
+                System.out.println("Login success!");
+                return true;
+            }else if(response.equals("0")){
+                System.out.println("Login fail!");
+                return false;
             }
 
-            // TODO: register the new account here.
-            return true;
+            return false;
         }
 
         @Override
