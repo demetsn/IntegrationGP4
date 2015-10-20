@@ -1,10 +1,16 @@
 package ephec.noticeme;
 
 import android.app.DatePickerDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -196,8 +202,9 @@ public class AddMemo extends Fragment implements View.OnClickListener{
 
                 if(db.addAlarm(memo))
                 {
-                    Toast toast = Toast.makeText(getActivity(), "Memo enregistré", Toast.LENGTH_LONG);
-                    toast.show();
+                    /*Toast toast = Toast.makeText(getActivity(), "Memo enregistré", Toast.LENGTH_LONG);
+                    toast.show();*/
+                    launchNotification();
                 }
 
                 break;
@@ -221,5 +228,41 @@ public class AddMemo extends Fragment implements View.OnClickListener{
         now = today+"/"+thisMonth+"/"+thisYear+"|"+thisHour+":"+thisMinute;
 
         return now;
+    }
+
+    public void launchNotification()
+    {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(getActivity())
+                        .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                        .setContentTitle("Memo saved")
+                        .setContentText("Congratulations, you just saved a new memo");
+
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(getContext().getApplicationContext(), MainActivity.class);
+
+        // The stack builder object will contain an artificial back stack for the
+        // started Activity.
+        // This ensures that navigating backward from the Activity leads out of
+        // your application to the Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getActivity());
+
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(MainActivity.class);
+
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // mId allows you to update the notification later on.
+        int mId = 1;
+        mNotificationManager.notify(mId, mBuilder.build());
     }
 }
