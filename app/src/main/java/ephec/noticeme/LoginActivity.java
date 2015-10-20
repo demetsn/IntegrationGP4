@@ -262,8 +262,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
+            //String response;
             try {
+                /*URL url= new URL("superpie.ddns.net/logindroid");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(15000);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                Uri.Builder builder = new Uri.Builder().appendQueryParameter("username",mEmail)
+                                                .appendQueryParameter("password",mPassword);
+                String query = builder.build().getEncodedQuery();
+                OutputStream os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,"UTF-8"));
+                writer.write(query);
+                writer.flush();
+                writer.close();
+                os.close();
+                InputStream inputStream = conn.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"UTF-8"));
+                response = "";
+                String line = "";
+                while ((line = bufferedReader.readLine())!=null){
+                    response+= line;
+                }
+                bufferedReader.close();
+                inputStream.close();
+                conn.disconnect();
+                */
                 // Simulate network access.
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
