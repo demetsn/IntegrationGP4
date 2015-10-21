@@ -16,16 +16,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     public static FragmentManager fragmentManager;
+    private String value="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            value = extras.getString("email");
+        }
+        TextView userTxtView = (TextView)findViewById(R.id.username);
+        userTxtView.setText(value);
 
         fragmentManager = getSupportFragmentManager();
         // Check that the activity is using the layout version with
