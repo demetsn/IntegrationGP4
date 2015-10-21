@@ -238,7 +238,7 @@ public class AddMemo extends Fragment implements View.OnClickListener{
     {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(getActivity())
-                        .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                        .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("Memo saved")
                         .setContentText("Congratulations, you just saved a new memo");
 
