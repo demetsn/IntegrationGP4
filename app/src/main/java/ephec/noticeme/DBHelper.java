@@ -149,11 +149,11 @@ public class DBHelper extends SQLiteOpenHelper
     }
 
 
-    public boolean deleteAlarm(int id) {
+    public boolean deleteAlarm(String title) {
 
         boolean result = false;
 
-        String query = "Select * FROM " + TABLE_ALARMS + " WHERE " + COlUMN_ID + " =  \"" + id + "\"";
+        String query = "Select * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_TITLE + " =  \"" + title + "\"";
 
         SQLiteDatabase db = this.getWritableDatabase();
 

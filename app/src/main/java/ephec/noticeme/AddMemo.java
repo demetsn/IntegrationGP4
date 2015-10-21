@@ -50,6 +50,7 @@ public class AddMemo extends Fragment implements View.OnClickListener{
     private TextView date;
     private TextView time;
     private Button save;
+    private Button delete;
 
     Alarm memo;
 
@@ -101,6 +102,8 @@ public class AddMemo extends Fragment implements View.OnClickListener{
         this.time.setOnClickListener(this);
         this.save = (Button) view.findViewById(R.id.memo_save_button);
         this.save.setOnClickListener(this);
+        this.delete = (Button) view.findViewById(R.id.memo_delete_button);
+        this.delete.setOnClickListener(this);
 
         if(this.getArguments() != null)
         {
@@ -111,8 +114,6 @@ public class AddMemo extends Fragment implements View.OnClickListener{
             memo = db.getAlarm(memoTitle);
             title.setText(memo.getTitle());
             description.setText(memo.getDescription());
-            Toast toast = Toast.makeText(getActivity(), memo.getAlarmDate(), Toast.LENGTH_LONG);
-            toast.show();
             String[] memoTime = memo.getAlarmDate().split("&");
 
             date.setText(memoTime[0]);
@@ -237,6 +238,15 @@ public class AddMemo extends Fragment implements View.OnClickListener{
 
                 break;
 
+            case R.id.memo_delete_button:
+
+                db = new DBHelper(getActivity());
+
+                db.deleteAlarm(title.getText().toString());
+                Intent save = new Intent(getActivity(), MainActivity.class);
+                startActivity(save);
+
+                break;
         }
 
     }
