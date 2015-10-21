@@ -173,7 +173,7 @@ public class DBHelper extends SQLiteOpenHelper
     }
 
 
-    public boolean modifyAlarm(String name, Alarm alarm) {
+    public boolean modifyAlarm(String title, Alarm alarm) {
 
         boolean result = false;
 
@@ -190,7 +190,7 @@ public class DBHelper extends SQLiteOpenHelper
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.update(TABLE_ALARMS, values, COlUMN_ID + "=" + alarm.getId(), null);
+        db.update(TABLE_ALARMS, values, COLUMN_TITLE + "= '"+ title + "'", null);
 
         result = true;
         return result;
@@ -266,5 +266,25 @@ public class DBHelper extends SQLiteOpenHelper
         db.close();
 
         return alarms;
+    }
+
+    public boolean alarmExist(String title)
+    {
+        boolean exist = false;
+        String query = "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_TITLE + " = \"" + title + "\"";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor.getCount()==0)
+        {
+            exist = false;
+        }
+        else
+        {
+            exist = true;
+        }
+
+        return exist;
     }
 }

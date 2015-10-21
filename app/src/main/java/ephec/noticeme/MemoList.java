@@ -135,15 +135,15 @@ public class MemoList extends Fragment {
                 alarmTitle = (String) adapter.getItemAtPosition(position);
                 Fragment newFragment = new AddMemo();
 
-                /*Intent modMemo = new Intent(getActivity(), AddMemo.class);
-                modMemo.putExtra("title", alarmTitle);
-                startActivity(modMemo);*/
+                //Ajout d'une variable dans au frgament grace au Bundle
+                Bundle args = new Bundle();
+                args.putString("title", alarmTitle);
+                newFragment.setArguments(args);
 
                 transaction.replace(R.id.fragment_container, newFragment);
+                transaction.setBreadCrumbTitle(alarmTitle);
                 transaction.addToBackStack(null);
                 transaction.commit();
-
-                Toast.makeText(getActivity(), "Test " + alarmTitle, Toast.LENGTH_LONG).show();
             }
         });
         lv.setSelection(0);
@@ -162,8 +162,6 @@ public class MemoList extends Fragment {
         Integer Position = lv.getCheckedItemPosition();
         alarmTitle = lv.getItemAtPosition(Position).toString();
 
-        Toast.makeText(getActivity(), "Test " + alarmTitle, Toast.LENGTH_LONG).show();
-
         return super.onOptionsItemSelected(item);
 
     }
@@ -173,8 +171,6 @@ public class MemoList extends Fragment {
         Intent modMemo = new Intent(getActivity(), AddMemo.class);
         modMemo.putExtra("title", alarmTitle);
         startActivity(modMemo);
-
-        Toast.makeText(getActivity(), "Test " + alarmTitle, Toast.LENGTH_LONG).show();
     }
 
     private String getMemoTitle(int Position){

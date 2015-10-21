@@ -51,6 +51,8 @@ public class AddMemo extends Fragment implements View.OnClickListener{
     private TextView time;
     private Button save;
 
+    Alarm memo;
+
     private OnFragmentInteractionListener mListener;
 
     /**
@@ -99,6 +101,23 @@ public class AddMemo extends Fragment implements View.OnClickListener{
         this.time.setOnClickListener(this);
         this.save = (Button) view.findViewById(R.id.memo_save_button);
         this.save.setOnClickListener(this);
+
+        if(this.getArguments() != null)
+        {
+            String memoTitle = this.getArguments().getString("title");
+            DBHelper db = new DBHelper(getActivity());
+
+            db.getReadableDatabase();
+            memo = db.getAlarm(memoTitle);
+            title.setText(memo.getTitle());
+            description.setText(memo.getDescription());
+            Toast toast = Toast.makeText(getActivity(), memo.getAlarmDate(), Toast.LENGTH_LONG);
+            toast.show();
+            String[] memoTime = memo.getAlarmDate().split("&");
+
+            date.setText(memoTime[0]);
+            time.setText(memoTime[1]);
+        }
 
         return view;
 
@@ -188,7 +207,7 @@ public class AddMemo extends Fragment implements View.OnClickListener{
 
                 memo.setTitle(title.getText().toString());
                 memo.setDescription(description.getText().toString());
-                memo.setAlarmDate(date.getText().toString() + "|" + time.getText().toString()); //Pas top on a xx/yy/zzzz|AA:BB
+                memo.setAlarmDate(date.getText().toString() + "&" + time.getText().toString()); //Pas top on a xx/yy/zzzz&AA:BB
                 memo.setModificationDate(getActualTime());
 
                 //valeurs test
@@ -200,15 +219,20 @@ public class AddMemo extends Fragment implements View.OnClickListener{
 
                 DBHelper db = new DBHelper(getActivity());
 
-                if(db.addAlarm(memo))
+                if(db.alarmExist(memo.getTitle()))
                 {
-                    //Toast toast = Toast.makeText(getActivity(), "Memo enregistré", Toast.LENGTH_LONG);
-                    //toast.show();
-
-                    launchNotification();
-
+                    db.modifyAlarm(memo.getTitle(), memo);
                     Intent save = new Intent(getActivity(), MainActivity.class);
                     startActivity(save);
+                }
+                else
+                {
+                    if (db.addAlarm(memo)) {
+                        launchNotification();
+
+                        Intent save = new Intent(getActivity(), MainActivity.class);
+                        startActivity(save);
+                    }
                 }
 
                 break;
@@ -229,7 +253,7 @@ public class AddMemo extends Fragment implements View.OnClickListener{
         int thisHour = cal.get(Calendar.HOUR_OF_DAY);
         int thisMinute = cal.get(Calendar.MINUTE);
 
-        now = today+"/"+thisMonth+"/"+thisYear+"|"+thisHour+":"+thisMinute;
+        now = today+"-"+thisMonth+"-"+thisYear+"&"+thisHour+":"+thisMinute;
 
         return now;
     }
