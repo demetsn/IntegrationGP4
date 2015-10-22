@@ -75,7 +75,7 @@
 
             <fragment
                 android:layout_width="wrap_content"
-                android:layout_height="300dp"
+                android:layout_height="200dp"
                 android:name="com.google.android.gms.maps.MapFragment"
                 android:id="@+id/fragment"
                 android:layout_below="@+id/memo_textTime"
