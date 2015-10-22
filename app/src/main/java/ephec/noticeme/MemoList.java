@@ -1,9 +1,11 @@
 package ephec.noticeme;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,7 +33,7 @@ public class MemoList extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    Alarm item;
+    String alarmTitle;
     private ListView lv;
 
     // TODO: Rename and change types of parameters
@@ -114,6 +116,7 @@ public class MemoList extends Fragment {
 
     private void fillMemoList(String category, String param) {
 
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
         DBHelper db = new DBHelper(getActivity());
 
         db.getWritableDatabase();
@@ -123,8 +126,26 @@ public class MemoList extends Fragment {
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_single_choice,memos );
         lv.setAdapter(arrayAdapter);
-        lv.setItemChecked(0,true);
-        lv.requestFocus();
+        lv.setItemChecked(0, true);
+        lv.requestFocusFromTouch();
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
+
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                alarmTitle = (String) adapter.getItemAtPosition(position);
+                Fragment newFragment = new AddMemo();
+
+                //Ajout d'une variable dans au frgament grace au Bundle
+                Bundle args = new Bundle();
+                args.putString("title", alarmTitle);
+                newFragment.setArguments(args);
+
+                transaction.replace(R.id.fragment_container, newFragment);
+                transaction.setBreadCrumbTitle(alarmTitle);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
         lv.setSelection(0);
 
     }
@@ -138,17 +159,24 @@ public class MemoList extends Fragment {
             return true;
         }
 
+        Integer Position = lv.getCheckedItemPosition();
+        alarmTitle = lv.getItemAtPosition(Position).toString();
+
         return super.onOptionsItemSelected(item);
+
     }
     public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
-        item = (Alarm) adapter.getItemAtPosition(position);
-        Toast.makeText(getActivity(), "Test " + item.getTitle(), Toast.LENGTH_LONG).show();
+        alarmTitle = (String) adapter.getItemAtPosition(position);
+
+        Intent modMemo = new Intent(getActivity(), AddMemo.class);
+        modMemo.putExtra("title", alarmTitle);
+        startActivity(modMemo);
     }
 
-    private Alarm getPlace(int Position){
-        Alarm placeFound = new Alarm();
-        placeFound = (Alarm) lv.getItemAtPosition(Position);
-        return placeFound;
+    private String getMemoTitle(int Position){
+        String memoFound;
+        memoFound = (String) lv.getItemAtPosition(Position);
+        return memoFound;
     }
 
 }
