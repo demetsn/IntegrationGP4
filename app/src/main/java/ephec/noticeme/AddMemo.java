@@ -208,7 +208,7 @@ public class AddMemo extends Fragment implements View.OnClickListener{
 
                 memo.setTitle(title.getText().toString());
                 memo.setDescription(description.getText().toString());
-                memo.setAlarmDate(date.getText().toString() + "&" + time.getText().toString()); //Pas top on a xx/yy/zzzz&AA:BB
+                memo.setAlarmDate(date.getText().toString() + "&" + time.getText().toString()); //Pas top on a xx-yy-zzzz&AA:BB
                 memo.setModificationDate(getActualTime());
 
                 //valeurs test
@@ -224,14 +224,16 @@ public class AddMemo extends Fragment implements View.OnClickListener{
                 {
                     db.modifyAlarm(memo.getTitle(), memo);
                     Intent save = new Intent(getActivity(), MainActivity.class);
+                    save.putExtra("Title",memo.getTitle());
                     startActivity(save);
                 }
                 else
                 {
                     if (db.addAlarm(memo)) {
-                        launchNotification();
+                        //launchNotification();
 
                         Intent save = new Intent(getActivity(), MainActivity.class);
+                        save.putExtra("Title",memo.getTitle());
                         startActivity(save);
                     }
                 }
@@ -268,7 +270,7 @@ public class AddMemo extends Fragment implements View.OnClickListener{
         return now;
     }
 
-    public void launchNotification()
+    /*public void launchNotification()
     {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(getActivity())
@@ -278,6 +280,7 @@ public class AddMemo extends Fragment implements View.OnClickListener{
 
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(getContext().getApplicationContext(), MainActivity.class);
+        resultIntent.putExtra("memoTitle", memo.getTitle());
 
         // The stack builder object will contain an artificial back stack for the
         // started Activity.
@@ -302,5 +305,5 @@ public class AddMemo extends Fragment implements View.OnClickListener{
         // mId allows you to update the notification later on.
         int mId = 1;
         mNotificationManager.notify(mId, mBuilder.build());
-    }
+    }*/
 }

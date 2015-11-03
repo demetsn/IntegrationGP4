@@ -1,5 +1,6 @@
     package ephec.noticeme;
 
+    import java.util.Calendar;
     import java.util.Date;
 
     /**
@@ -93,5 +94,4 @@
         public void setGroupId(int groupId) {
             this.groupId = groupId;
         }
-
     }

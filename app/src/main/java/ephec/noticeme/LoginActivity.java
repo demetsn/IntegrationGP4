@@ -276,8 +276,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 URL url= new URL("http://superpie.ddns.net:8035/NoticeMe/web/app_dev.php/android/login");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(15000);
+                conn.setReadTimeout(100000);
+                conn.setConnectTimeout(150000);
                 conn.setRequestMethod("POST");
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
