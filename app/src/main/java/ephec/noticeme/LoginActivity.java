@@ -3,6 +3,7 @@ package ephec.noticeme;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -27,8 +28,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -92,6 +99,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        StringBuilder text = new StringBuilder();
+        File file = new File(this.getFilesDir(), "user.save");
+        try{
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = br.readLine()) != null) {
+                text.append(line);
+                text.append('\n');
+            }
+            br.close();
+        }catch(FileNotFoundException e){
+            return;
+        }
+        catch(Exception e){
+            return;
+        }
+
+        mEmailView.setText(text.toString());
+        mPasswordView.requestFocus();
     }
 
     private void populateAutoComplete() {
@@ -271,7 +298,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             String response;
             try {
                 //OLD HASHED PASS
-                /*MessageDigest digest = MessageDigest.getInstance("SHA-512");
+                MessageDigest digest = MessageDigest.getInstance("SHA-512");
                 byte[] hash = digest.digest(mPassword.getBytes("UTF-8"));
                 StringBuffer hexString = new StringBuffer();
                 for (int i = 0; i < hash.length; i++) {
@@ -280,7 +307,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     hexString.append(hex);
                 }
                 String hashed = hexString.toString();
-                */
+
 
                 //generation de cle
                 /*KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -314,7 +341,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 String hashed = hexString.toString();
                 */
 
-                /*
+
                 URL url= new URL("http://superpie.ddns.net:8035/NoticeMe/web/app_dev.php/android/login");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setReadTimeout(10000);
@@ -341,24 +368,32 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 bufferedReader.close();
                 inputStream.close();
                 conn.disconnect();
-                */
 
-            } //catch (InterruptedException e) {
-                //return false;
-            //}
-            catch (Exception e){
+
+            }catch (Exception e){
                 System.out.println("Une exeption s'est produite : "+e);
                 return false;
             }
 
-            /*if(response.equals("1")){
+            if(response.equals("1")){
                 System.out.println("Login success!");
+
+                String filename = "user.save";
+                File file = new File(LoginActivity.this.getApplicationContext().getFilesDir(), filename);
+                FileOutputStream outputStream;
+                try {
+                    outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                    outputStream.write(mEmail.getBytes());
+                    outputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return true;
             }else if(response.equals("0")){
                 System.out.println("Login fail!");
                 return false;
             }
-            */
+
             return true;
         }
 
