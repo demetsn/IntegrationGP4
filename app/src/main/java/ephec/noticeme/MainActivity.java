@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.LocationManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
@@ -40,6 +41,8 @@ public class MainActivity extends AppCompatActivity
     AlarmManager manager;
     PendingIntent pendingIntent;
     BroadcastReceiver br;
+
+    float radius = 50f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,6 +196,7 @@ public class MainActivity extends AppCompatActivity
         memo = db.getAlarm(title);
         db.close();
         setTimedAlert(memo);
+        setProximityAlert(memo);
     }
 
     private void setTimedAlert(Alarm memo)
@@ -235,6 +239,19 @@ public class MainActivity extends AppCompatActivity
         return value;
     }
 
+    private void setProximityAlert(Alarm memo)
+    {
+        LocationManager locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        Intent intent = new Intent("ephec.noticeme");
+        intent.putExtra("memoTitle", memo.getTitle());
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
+
+        setup();
+    }
+
     // Prépare the alarm.
     public void setup() {
 
@@ -255,7 +272,7 @@ public class MainActivity extends AppCompatActivity
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_notifications_black_24dp)
                         .setContentTitle("You have a new memo!")
-                        .setContentText("Click to see you memo.");
+                        .setContentText("Click to see your memo.");
 
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this.getApplicationContext(), MainActivity.class);
