@@ -79,11 +79,8 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 //Snackbar.make(view, "Button to add a memo", Snackbar.LENGTH_LONG)
                   //      .setAction("Action", null).show();
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                AddMemo fragment = new AddMemo();
-                transaction.replace(R.id.fragment_container, fragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                Intent intent = new Intent(view.getContext(),AddMemoActivity.class);
+                startActivity(intent);
             }
         });
 
