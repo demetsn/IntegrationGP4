@@ -18,11 +18,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     public static FragmentManager fragmentManager;
-    private String value="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,12 +34,20 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            value = extras.getString("email");
-        }
         TextView userTxtView = (TextView)findViewById(R.id.username);
-        userTxtView.setText(value);
+        File file = new File(this.getFilesDir(), "user.save");
+        String line;
+        try{
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            line = br.readLine();
+            br.close();
+        }catch(FileNotFoundException e){
+            return;
+        }
+        catch(Exception e){
+            return;
+        }
+        userTxtView.setText(line.split("£")[0]);
 
         fragmentManager = getSupportFragmentManager();
         // Check that the activity is using the layout version with
@@ -130,7 +142,9 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_list) {
             newFragment = new MemoList();
         } else if (id == R.id.nav_add) {
-            newFragment = new AddMemo();
+            //newFragment = new AddMemo();
+            Intent intent= new Intent(this, AddMemoActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_maps) {
             newFragment = new MapFragment();
         } else if (id == R.id.nav_profile) {
