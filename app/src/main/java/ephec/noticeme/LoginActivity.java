@@ -107,7 +107,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             String line;
             while ((line = br.readLine()) != null) {
                 text.append(line);
-                text.append('\n');
+                text.append('£');
             }
             br.close();
         }catch(FileNotFoundException e){
@@ -116,9 +116,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         catch(Exception e){
             return;
         }
-
-        mEmailView.setText(text.toString());
-        mPasswordView.requestFocus();
+        if(text.toString().isEmpty()){
+            return;
+        }
+        String fromFile[]= text.toString().split("£");
+        mEmailView.setText(fromFile[0]);
+        mPasswordView.setText(fromFile[1]);
+        attemptLogin();
+        //mPasswordView.requestFocus();
     }
 
     private void populateAutoComplete() {
@@ -384,6 +389,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 try {
                     outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
                     outputStream.write(mEmail.getBytes());
+                    outputStream.write("£".getBytes());
+                    outputStream.write(mPassword.getBytes());
                     outputStream.close();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -393,7 +400,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 System.out.println("Login fail!");
                 return false;
             }
-
             return true;
         }
 
@@ -401,10 +407,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
-
             if (success) {
                 Intent intent= new Intent(LoginActivity.this,MainActivity.class);
-                intent.putExtra("email",mEmail);
                 startActivity(intent);
                 //finish();
             } else {
