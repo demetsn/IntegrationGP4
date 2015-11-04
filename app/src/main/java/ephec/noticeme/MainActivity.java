@@ -55,11 +55,9 @@ public class MainActivity extends AppCompatActivity
         if (extras != null) {
             if (extras.containsKey("email")) {
                 value = extras.getString("email");
-                //Toast.makeText(getApplicationContext(), "Passage de l'intent email", Toast.LENGTH_LONG).show();
             }
             if(extras.containsKey("Title"))
             {
-                //Toast.makeText(getApplicationContext(), "Passage de l'intent titre", Toast.LENGTH_LONG).show();
                 launchMemoAlarms(extras.getString("Title"));
             }
         }
@@ -275,7 +273,8 @@ public class MainActivity extends AppCompatActivity
                         .setContentText("Click to see your memo.");
 
         // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(this.getApplicationContext(), MainActivity.class);
+        Intent resultIntent = new Intent(this.getApplicationContext(), MemoOverviewActivity.class);
+        //Intent resultIntent = new Intent(this.getApplicationContext(), MainActivity.class);
         resultIntent.putExtra("memoTitle", title);
 
         // The stack builder object will contain an artificial back stack for the
