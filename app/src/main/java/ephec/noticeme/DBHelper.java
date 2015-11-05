@@ -118,6 +118,40 @@ public class DBHelper extends SQLiteOpenHelper
         return alarm;
     }
 
+    public ArrayList<Alarm> getAllAlarm(){
+
+        String query = "Select * FROM " + TABLE_ALARMS;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        ArrayList<Alarm> alarms = new ArrayList<Alarm>();
+
+        if (cursor.moveToFirst()) {
+
+            while (cursor.isAfterLast() == false) {
+                Alarm alarm = new Alarm();
+
+                alarm.setId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COlUMN_ID))));
+                alarm.setGroupId(Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_GROUP_ID))));
+                alarm.setModificationDate(cursor.getString(cursor.getColumnIndex(COLUMN_MODIF_DATE)));
+                alarm.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
+                alarm.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
+                alarm.setLatitude(Double.parseDouble(cursor.getString(cursor.getColumnIndex(COLUMN_LATITUDE))));
+                alarm.setLongitude(Double.parseDouble(cursor.getString(cursor.getColumnIndex(COLUMN_LONGITUDE))));
+                alarm.setAlarmDate(cursor.getString(cursor.getColumnIndex(COLUMN_ALARM_DATE)));
+
+                cursor.moveToNext();
+
+                alarms.add(alarm);
+            }
+            cursor.close();
+        }
+
+        db.close();
+
+        return alarms;
+    }
+
 
     public boolean deleteAlarm(int id) {
 
@@ -141,7 +175,6 @@ public class DBHelper extends SQLiteOpenHelper
         db.close();
         return result;
     }
-
 
     public boolean modifyAlarm(String name, Alarm alarm) {
 
@@ -172,7 +205,7 @@ public class DBHelper extends SQLiteOpenHelper
 
         String query = "";
 
-        if(search == "")
+        if(search.equals(""))
         {
             query = query + "SELECT * FROM "+TABLE_ALARMS;
         }
@@ -203,7 +236,6 @@ public class DBHelper extends SQLiteOpenHelper
                 case COLUMN_ALARM_DATE:
                     query = query + "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_ALARM_DATE + " = \"" + search + "\"";
                     break;
-
             }
         }
 

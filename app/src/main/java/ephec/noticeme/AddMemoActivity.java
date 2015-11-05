@@ -55,7 +55,7 @@ public class AddMemoActivity extends AppCompatActivity
     private LatLng loc;
     private Marker mMarker;
     private Geocoder geocode;
-    private static int markerCount = 0;
+    private static int markerCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +64,8 @@ public class AddMemoActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        markerCount = 0;
 
         this.title = (TextView) this.findViewById(R.id.memo_title);
         this.description = (TextView) this.findViewById(R.id.memo_description);
@@ -126,7 +128,7 @@ public class AddMemoActivity extends AppCompatActivity
                         .draggable(true)
                     );
                     mMarker.showInfoWindow();
-                    mMap.animateCamera((CameraUpdateFactory.newLatLngZoom(loc, 14)));
+                    mMap.animateCamera((CameraUpdateFactory.newLatLngZoom(loc, 13)));
                     markerCount = 1;
                 }
             }
