@@ -7,6 +7,9 @@ import android.app.TaskStackBuilder;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -21,17 +24,38 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
-public class AddMemoActivity extends AppCompatActivity implements View.OnClickListener{
+public class AddMemoActivity extends AppCompatActivity
+        implements
+        View.OnClickListener,
+        OnMapReadyCallback{
+
     private TextView title;
     private TextView description;
     private TextView date;
     private TextView time;
     private Button save;
-
+    private GoogleMap mMap;
+    private LatLng loc;
+    private Marker mMarker;
+    private Geocoder geocode;
+    private static int markerCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,36 +95,81 @@ public class AddMemoActivity extends AppCompatActivity implements View.OnClickLi
                 }
             }
         });
+
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_frag);
+        mapFragment.getMapAsync(this);
+
+        geocode = new Geocoder(this, Locale.getDefault());
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map){
+        mMap = map;
+        mMap.setMyLocationEnabled(true);
+
+        GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
+            @Override
+            public void onMyLocationChange(Location location) {
+                List<Address> addresses = null;
+                loc = new LatLng(location.getLatitude(),location.getLongitude());
+                if (markerCount == 0) {
+                    try{
+                        addresses = geocode.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+                    }catch (IOException e){
+
+                    }
+                    mMarker = mMap.addMarker(new MarkerOptions()
+                        .position(loc)
+                        .title("Tap the screen to update location")
+                        .snippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality())
+                        .draggable(true)
+                    );
+                    mMarker.showInfoWindow();
+                    mMap.animateCamera((CameraUpdateFactory.newLatLngZoom(loc, 14)));
+                    markerCount = 1;
+                }
+            }
+        };
+        mMap.setOnMyLocationChangeListener(myLocationChangeListener);
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                List<Address> addresses = null;
+                try{
+                    addresses = geocode.getFromLocation(latLng.latitude, latLng.longitude,1);
+                }catch (IOException e){
+
+                }
+                mMarker.setPosition(latLng);
+                mMarker.setSnippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality());
+                mMarker.showInfoWindow();
+            }
+        });
+
     }
 
     public void onClick(View v) throws NullPointerException {
-
         switch (v.getId()) {
             case R.id.memo_textDate:
-
                 Calendar c = Calendar.getInstance();
-
                 int year = c.get(Calendar.YEAR);
                 int month = c.get(Calendar.MONTH);
                 int day = c.get(Calendar.DAY_OF_MONTH);
 
                 DatePickerDialog dpd = new DatePickerDialog(this,
                         new DatePickerDialog.OnDateSetListener() {
-
                             @Override
                             public void onDateSet(DatePicker view, int thisYear,
                                                   int monthOfYear, int dayOfMonth) {
                                 date.setText(dayOfMonth + "-"
                                         + (monthOfYear + 1) + "-" + thisYear);
-
                             }
                         }, year, month, day);
                 dpd.show();
-
                 break;
 
             case R.id.memo_textTime:
-
                 Calendar calendar = Calendar.getInstance();
                 int hour = calendar.get(Calendar.HOUR_OF_DAY);
                 int minutes = calendar.get(Calendar.MINUTE);
@@ -114,14 +183,11 @@ public class AddMemoActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 }, hour, minutes, true);
                 tpd.show();
-
                 break;
 
             case R.id.memo_save_button:
 
                 //TODO Check the memo datas to avoid SQL injections.
-
-
                 //At this point, we consider the possible SQL injections, avoided.
                 Alarm memo = new Alarm();
 
@@ -129,10 +195,12 @@ public class AddMemoActivity extends AppCompatActivity implements View.OnClickLi
                 memo.setDescription(description.getText().toString());
                 memo.setAlarmDate(date.getText().toString() + "|" + time.getText().toString()); //Pas top on a xx/yy/zzzz|AA:BB
                 memo.setModificationDate(getActualTime());
+                memo.setLatitude(mMarker.getPosition().latitude);
+                memo.setLongitude(mMarker.getPosition().longitude);
 
                 //valeurs test
-                memo.setLatitude(0.0);
-                memo.setLongitude(0.0);
+                //memo.setLatitude(0.0);
+                //memo.setLongitude(0.0);
                 Random rn1 = new Random();
                 memo.setId(rn1.nextInt(10000));
                 memo.setGroupId(0);
@@ -141,25 +209,17 @@ public class AddMemoActivity extends AppCompatActivity implements View.OnClickLi
 
                 if(db.addAlarm(memo))
                 {
-                    //Toast toast = Toast.makeText(getActivity(), "Memo enregistré", Toast.LENGTH_LONG);
-                    //toast.show();
-
-                    launchNotification();
+                     launchNotification();
 
                     Intent save = new Intent(this, MainActivity.class);
                     startActivity(save);
                 }
-
                 break;
-
         }
-
     }
 
-    public String getActualTime()
-    {
+    public String getActualTime() {
         String now;
-
         Calendar cal = Calendar.getInstance();
 
         int thisYear = cal.get(Calendar.YEAR);
@@ -173,8 +233,7 @@ public class AddMemoActivity extends AppCompatActivity implements View.OnClickLi
         return now;
     }
 
-    public void launchNotification()
-    {
+    public void launchNotification() {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
