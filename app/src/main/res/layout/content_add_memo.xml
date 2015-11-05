@@ -72,15 +72,28 @@
                 android:textColorHint="@color/lightGrey"
                 android:layout_marginTop="5dp"/>
 
-            <fragment
+            <RelativeLayout
+                android:id="@+id/map_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="300dp"
-                android:name="com.google.android.gms.maps.MapFragment"
-                android:id="@+id/fragment"
                 android:layout_below="@+id/memo_textTime"
-                android:layout_alignParentStart="true"
-                tools:layout="@layout/fragment_map" />
+                android:layout_alignParentStart="true">
 
+                <fragment
+                    android:id="@+id/fragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="-100dp"
+                    android:layout_marginBottom="-100dp"
+                    android:name="com.google.android.gms.maps.MapFragment"/>
+
+                <ImageView
+                    android:id="@+id/transparent_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@color/transparent" />
+
+            </RelativeLayout>
 
         </RelativeLayout>
 

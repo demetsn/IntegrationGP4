@@ -13,9 +13,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -46,6 +49,28 @@ public class AddMemoActivity extends AppCompatActivity implements View.OnClickLi
         this.time.setOnClickListener(this);
         this.save = (Button) this.findViewById(R.id.memo_save_button);
         this.save.setOnClickListener(this);
+
+        final ScrollView mainSW = (ScrollView) this.findViewById(R.id.scrollView);
+        ImageView transparentImg = (ImageView) this.findViewById(R.id.transparent_image);
+        transparentImg.setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v,MotionEvent event)  {
+               int action = event.getAction();
+                switch (action){
+                    case MotionEvent.ACTION_DOWN:
+                        mainSW.requestDisallowInterceptTouchEvent(true);
+                        return false;
+                    case MotionEvent.ACTION_UP:
+                        mainSW.requestDisallowInterceptTouchEvent(false);
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        mainSW.requestDisallowInterceptTouchEvent(true);
+                        return false;
+                    default:
+                        return true;
+                }
+            }
+        });
     }
 
     public void onClick(View v) throws NullPointerException {
