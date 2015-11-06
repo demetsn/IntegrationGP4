@@ -11,26 +11,23 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -50,7 +47,6 @@ public class AddMemoActivity extends AppCompatActivity
     private TextView description;
     private TextView date;
     private TextView time;
-    private Button save;
     private GoogleMap mMap;
     private LatLng loc;
     private Marker mMarker;
@@ -73,8 +69,6 @@ public class AddMemoActivity extends AppCompatActivity
         this.date.setOnClickListener(this);
         this.time = (TextView) this.findViewById(R.id.memo_textTime);
         this.time.setOnClickListener(this);
-        this.save = (Button) this.findViewById(R.id.memo_save_button);
-        this.save.setOnClickListener(this);
 
         final ScrollView mainSW = (ScrollView) this.findViewById(R.id.scrollView);
         ImageView transparentImg = (ImageView) this.findViewById(R.id.transparent_image);
@@ -103,6 +97,54 @@ public class AddMemoActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
 
         geocode = new Geocoder(this, Locale.getDefault());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.add_memo_menu, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_done:
+                //TODO Check the memo datas to avoid SQL injections.
+                //At this point, we consider the possible SQL injections, avoided.
+                Alarm memo = new Alarm();
+
+                memo.setTitle(title.getText().toString());
+                memo.setDescription(description.getText().toString());
+                memo.setAlarmDate(date.getText().toString() + "|" + time.getText().toString()); //Pas top on a xx/yy/zzzz|AA:BB
+                memo.setModificationDate(getActualTime());
+                memo.setLatitude(mMarker.getPosition().latitude);
+                memo.setLongitude(mMarker.getPosition().longitude);
+
+                //valeurs test
+                //memo.setLatitude(0.0);
+                //memo.setLongitude(0.0);
+                Random rn1 = new Random();
+                memo.setId(rn1.nextInt(10000));
+                memo.setGroupId(0);
+
+                DBHelper db = new DBHelper(this);
+
+                if(db.addAlarm(memo))
+                {
+                    launchNotification();
+
+                    Intent save = new Intent(this, MainActivity.class);
+                    startActivity(save);
+                }
+
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
     }
 
     @Override
@@ -185,37 +227,6 @@ public class AddMemoActivity extends AppCompatActivity
                     }
                 }, hour, minutes, true);
                 tpd.show();
-                break;
-
-            case R.id.memo_save_button:
-
-                //TODO Check the memo datas to avoid SQL injections.
-                //At this point, we consider the possible SQL injections, avoided.
-                Alarm memo = new Alarm();
-
-                memo.setTitle(title.getText().toString());
-                memo.setDescription(description.getText().toString());
-                memo.setAlarmDate(date.getText().toString() + "|" + time.getText().toString()); //Pas top on a xx/yy/zzzz|AA:BB
-                memo.setModificationDate(getActualTime());
-                memo.setLatitude(mMarker.getPosition().latitude);
-                memo.setLongitude(mMarker.getPosition().longitude);
-
-                //valeurs test
-                //memo.setLatitude(0.0);
-                //memo.setLongitude(0.0);
-                Random rn1 = new Random();
-                memo.setId(rn1.nextInt(10000));
-                memo.setGroupId(0);
-
-                DBHelper db = new DBHelper(this);
-
-                if(db.addAlarm(memo))
-                {
-                     launchNotification();
-
-                    Intent save = new Intent(this, MainActivity.class);
-                    startActivity(save);
-                }
                 break;
         }
     }
