@@ -107,11 +107,28 @@ public class MemoList extends Fragment {
                 @Override
                 public void onClick(View v) {
                     Snackbar.make(v, "Show the memo page", Snackbar.LENGTH_LONG)
-                          .setAction("Action", null).show();
+                            .setAction("Action", null).show();
+                }
+            });
+            holder.textView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    // when the image is clicked, update the selected state
+                    ListData data = getItem(position);
+                    data.setChecked(!data.isChecked);
+                    updateCheckedState(holder, data);
+                    return true;
                 }
             });
             holder.tv3.setText(item.alarm.getDescription());
-            holder.textView.setOnLongClickListener(new View.OnLongClickListener() {
+            holder.tv3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Snackbar.make(v, "Show the memo page", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            });
+            holder.tv3.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     // when the image is clicked, update the selected state
