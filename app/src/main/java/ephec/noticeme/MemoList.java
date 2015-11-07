@@ -3,6 +3,7 @@ package ephec.noticeme;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -26,6 +27,8 @@ import java.util.List;
 
 
 public class MemoList extends Fragment {
+
+    private static final int HIGHLIGHT_COLOR = 0x999be6ff;
 
     private ColorGenerator mColorGenerator = ColorGenerator.MATERIAL;
     private TextDrawable.IBuilder mDrawableBuilder;
@@ -57,6 +60,7 @@ public class MemoList extends Fragment {
         }
 
     }
+
     private class SampleAdapter extends BaseAdapter {
 
         @Override
@@ -99,6 +103,24 @@ public class MemoList extends Fragment {
                 }
             });
             holder.textView.setText(item.alarm.getTitle());
+            holder.textView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Snackbar.make(v, "Show the memo page", Snackbar.LENGTH_LONG)
+                          .setAction("Action", null).show();
+                }
+            });
+            holder.tv3.setText(item.alarm.getDescription());
+            holder.textView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    // when the image is clicked, update the selected state
+                    ListData data = getItem(position);
+                    data.setChecked(!data.isChecked);
+                    updateCheckedState(holder, data);
+                    return true;
+                }
+            });
 
             return convertView;
         }
@@ -106,7 +128,7 @@ public class MemoList extends Fragment {
         private void updateCheckedState(ViewHolder holder, ListData item) {
             if (item.isChecked) {
                 holder.imageView.setImageDrawable(mDrawableBuilder.build(" ", 0xff616161));
-                holder.view.setBackgroundColor(Color.CYAN);
+                holder.view.setBackgroundColor(HIGHLIGHT_COLOR);
                 holder.checkIcon.setVisibility(View.VISIBLE);
             }
             else {
@@ -123,18 +145,17 @@ public class MemoList extends Fragment {
     private static class ViewHolder {
 
         private View view;
-
         private ImageView imageView;
-
         private TextView textView;
-
         private ImageView checkIcon;
+        private TextView tv3;
 
         private ViewHolder(View view) {
             this.view = view;
             imageView = (ImageView) view.findViewById(R.id.imageView2);
             textView = (TextView) view.findViewById(R.id.textView2);
             checkIcon = (ImageView) view.findViewById(R.id.check_icon);
+            tv3 = (TextView) view.findViewById(R.id.textView3);
         }
     }
 

@@ -1,6 +1,7 @@
 package ephec.noticeme;
 
 import android.content.Intent;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static FragmentManager fragmentManager;
+    private MenuItem itemMenu;
     private Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +114,13 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        String toolbarTitle = toolbar.getTitle().toString();
+        itemMenu = menu.findItem(R.id.action_delete);
+        if(!toolbarTitle.equals("Memo List")){
+            itemMenu.setVisible(false);
+        }else{
+            itemMenu.setVisible(true);
+        }
         return true;
     }
 
@@ -129,6 +138,19 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         if(id == R.id.action_refresh){
+            Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "refresh the list with the server",
+                    Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            return true;
+        }
+        if(id == R.id.action_delete){
+            Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "del the selected item",
+                    Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
             return true;
         }
         if(id == R.id.action_deco){
@@ -159,6 +181,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_list) {
             newFragment = new MemoList();
             toolbar.setTitle("Memo List");
+            itemMenu.setVisible(true);
         } else if (id == R.id.nav_add) {
             //newFragment = new AddMemo();
             Intent intent= new Intent(this, AddMemoActivity.class);
@@ -166,9 +189,11 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_maps) {
             newFragment = new MapFragment();
             toolbar.setTitle("Memo on map");
+            itemMenu.setVisible(false);
         } else if (id == R.id.nav_profile) {
             newFragment = new Profile();
             toolbar.setTitle("Profile");
+            itemMenu.setVisible(false);
         } else if (id == R.id.nav_settings) {
             Intent intent = new Intent(this,SettingsActivity.class);
             startActivity(intent);
