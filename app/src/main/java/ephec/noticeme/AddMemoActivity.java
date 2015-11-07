@@ -32,6 +32,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
@@ -105,6 +106,7 @@ public class AddMemoActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.add_memo_menu, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -113,16 +115,20 @@ public class AddMemoActivity extends AppCompatActivity
                 //At this point, we consider the possible SQL injections, avoided.
                 Alarm memo = new Alarm();
 
+                if(title.getText().toString().equals("")){
+                    title.setError("The title cannot be empty");
+                    title.requestFocus();
+                    return true;
+                }
+
                 memo.setTitle(title.getText().toString());
                 memo.setDescription(description.getText().toString());
-                memo.setAlarmDate(date.getText().toString() + "|" + time.getText().toString()); //Pas top on a xx/yy/zzzz|AA:BB
+                memo.setAlarmDate(
+                        date.getText() + "|" + time.getText().toString());
                 memo.setModificationDate(getActualTime());
                 memo.setLatitude(mMarker.getPosition().latitude);
                 memo.setLongitude(mMarker.getPosition().longitude);
 
-                //valeurs test
-                //memo.setLatitude(0.0);
-                //memo.setLongitude(0.0);
                 Random rn1 = new Random();
                 memo.setId(rn1.nextInt(10000));
                 memo.setGroupId(0);
@@ -138,12 +144,27 @@ public class AddMemoActivity extends AppCompatActivity
                 }
 
                 return true;
+            case R.id.action_cancel:
+
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+
+                return true;
+            case R.id.action_deco:
+                String filename = "user.save";
+                File file = new File(this.getFilesDir(), filename);
+                Boolean del = file.delete();
+                System.out.println(del);
+                if(del){
+                    Intent intentLog = new Intent(this, LoginActivity.class);
+                    startActivity(intentLog);
+                }
+                return true;
 
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
-
         }
     }
 
@@ -208,6 +229,7 @@ public class AddMemoActivity extends AppCompatActivity
                                                   int monthOfYear, int dayOfMonth) {
                                 date.setText(dayOfMonth + "-"
                                         + (monthOfYear + 1) + "-" + thisYear);
+
                             }
                         }, year, month, day);
                 dpd.show();

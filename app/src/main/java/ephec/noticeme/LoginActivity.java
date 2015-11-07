@@ -378,8 +378,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
 
             if(response.equals("1")){
-                System.out.println("Login success!");
-
                 String filename = "user.save";
                 File file = new File(LoginActivity.this.getApplicationContext().getFilesDir(), filename);
                 FileOutputStream outputStream;
@@ -394,10 +392,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
                 return true;
             }else if(response.equals("0")){
-                System.out.println("Login fail!");
                 return false;
             }
-            return true;
+            return false;
         }
 
         @Override

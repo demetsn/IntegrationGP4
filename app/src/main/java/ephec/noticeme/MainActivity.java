@@ -27,12 +27,15 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static FragmentManager fragmentManager;
+    private Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Memo List");
+
 
         TextView userTxtView = (TextView)findViewById(R.id.username);
         File file = new File(this.getFilesDir(), "user.save");
@@ -78,8 +81,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 //Snackbar.make(view, "Button to add a memo", Snackbar.LENGTH_LONG)
-                  //      .setAction("Action", null).show();
-                Intent intent = new Intent(view.getContext(),AddMemoActivity.class);
+                //      .setAction("Action", null).show();
+                Intent intent = new Intent(view.getContext(), AddMemoActivity.class);
                 startActivity(intent);
             }
         });
@@ -92,6 +95,7 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setCheckedItem(R.id.nav_list);
     }
 
     @Override
@@ -120,6 +124,22 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this,SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        if(id == R.id.action_refresh){
+            return true;
+        }
+        if(id == R.id.action_deco){
+            String filename = "user.save";
+            File file = new File(this.getFilesDir(), filename);
+            Boolean del = file.delete();
+            System.out.println(del);
+            if(del){
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
+            }
             return true;
         }
 
@@ -138,14 +158,17 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_list) {
             newFragment = new MemoList();
+            toolbar.setTitle("Memo List");
         } else if (id == R.id.nav_add) {
             //newFragment = new AddMemo();
             Intent intent= new Intent(this, AddMemoActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_maps) {
             newFragment = new MapFragment();
+            toolbar.setTitle("Memo on map");
         } else if (id == R.id.nav_profile) {
             newFragment = new Profile();
+            toolbar.setTitle("Profile");
         } else if (id == R.id.nav_settings) {
             Intent intent = new Intent(this,SettingsActivity.class);
             startActivity(intent);
