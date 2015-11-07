@@ -59,7 +59,6 @@ public class DBHelper extends SQLiteOpenHelper
         onCreate(db);
     }
 
-
     public boolean addAlarm(Alarm alarm) {
 
         boolean result = false;
@@ -151,7 +150,6 @@ public class DBHelper extends SQLiteOpenHelper
 
         return alarms;
     }
-
 
     public boolean deleteAlarm(int id) {
 
