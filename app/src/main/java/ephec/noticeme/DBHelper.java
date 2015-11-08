@@ -119,7 +119,7 @@ public class DBHelper extends SQLiteOpenHelper
 
     public ArrayList<Alarm> getAllAlarm(){
 
-        String query = "Select * FROM " + TABLE_ALARMS;
+        String query = "Select * FROM " + TABLE_ALARMS + " ORDER BY "+COLUMN_ALARM_DATE+" ASC";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, null);
 

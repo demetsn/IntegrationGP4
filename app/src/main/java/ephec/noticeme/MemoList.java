@@ -138,6 +138,24 @@ public class MemoList extends Fragment {
                     return true;
                 }
             });
+            holder.tv4.setText(item.alarm.getAlarmDate());
+            holder.tv4.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Snackbar.make(v, "Show the memo page", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            });
+            holder.tv4.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    // when the image is clicked, update the selected state
+                    ListData data = getItem(position);
+                    data.setChecked(!data.isChecked);
+                    updateCheckedState(holder, data);
+                    return true;
+                }
+            });
 
             return convertView;
         }
@@ -166,6 +184,7 @@ public class MemoList extends Fragment {
         private TextView textView;
         private ImageView checkIcon;
         private TextView tv3;
+        private TextView tv4;
 
         private ViewHolder(View view) {
             this.view = view;
@@ -173,6 +192,7 @@ public class MemoList extends Fragment {
             textView = (TextView) view.findViewById(R.id.textView2);
             checkIcon = (ImageView) view.findViewById(R.id.check_icon);
             tv3 = (TextView) view.findViewById(R.id.textView3);
+            tv4 = (TextView) view.findViewById(R.id.textView4);
         }
     }
 

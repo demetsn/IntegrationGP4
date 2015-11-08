@@ -124,7 +124,7 @@ public class AddMemoActivity extends AppCompatActivity
                 memo.setTitle(title.getText().toString());
                 memo.setDescription(description.getText().toString());
                 memo.setAlarmDate(
-                        date.getText() + "|" + time.getText().toString());
+                        date.getText() + " " + time.getText().toString());
                 memo.setModificationDate(getActualTime());
                 memo.setLatitude(mMarker.getPosition().latitude);
                 memo.setLongitude(mMarker.getPosition().longitude);
@@ -227,8 +227,8 @@ public class AddMemoActivity extends AppCompatActivity
                             @Override
                             public void onDateSet(DatePicker view, int thisYear,
                                                   int monthOfYear, int dayOfMonth) {
-                                date.setText(dayOfMonth + "-"
-                                        + (monthOfYear + 1) + "-" + thisYear);
+                                date.setText(dayOfMonth + "/"
+                                        + (monthOfYear + 1) + "/" + thisYear);
 
                             }
                         }, year, month, day);
@@ -241,11 +241,21 @@ public class AddMemoActivity extends AppCompatActivity
                 int minutes = calendar.get(Calendar.MINUTE);
 
                 TimePickerDialog tpd = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
-
                     @Override
                     public void onTimeSet(TimePicker view, int thisHour, int thisMinute) {
-                        time.setText(thisHour+":"+thisMinute);
-
+                        String SHours;
+                        String SMinutes;
+                        if(thisHour<10){
+                            SHours="0"+thisHour;
+                        }else{
+                            SHours=""+thisHour;
+                        }
+                        if(thisMinute<10){
+                            SMinutes="0"+thisMinute;
+                        }else{
+                            SMinutes=""+thisMinute;
+                        }
+                        time.setText(SHours+":"+SMinutes);
                     }
                 }, hour, minutes, true);
                 tpd.show();
