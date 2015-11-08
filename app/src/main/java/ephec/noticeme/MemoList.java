@@ -1,6 +1,5 @@
 package ephec.noticeme;
 
-
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -102,65 +101,41 @@ public class MemoList extends Fragment {
                     updateCheckedState(holder, data);
                 }
             });
+
+            View.OnClickListener onClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Snackbar.make(v, "Show the memo page", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            };
+            View.OnLongClickListener onLongClickListener = new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    // when the image is clicked, update the selected state
+                    ListData data = getItem(position);
+                    data.setChecked(!data.isChecked);
+                    updateCheckedState(holder, data);
+                    return true;
+                }
+            };
+
             holder.textView.setText(item.alarm.getTitle());
-            holder.textView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Snackbar.make(v, "Show the memo page", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            });
-            holder.textView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    // when the image is clicked, update the selected state
-                    ListData data = getItem(position);
-                    data.setChecked(!data.isChecked);
-                    updateCheckedState(holder, data);
-                    return true;
-                }
-            });
+            holder.textView.setOnClickListener(onClickListener);
+            holder.textView.setOnLongClickListener(onLongClickListener);
+
             holder.tv3.setText(item.alarm.getDescription());
-            holder.tv3.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Snackbar.make(v, "Show the memo page", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            });
-            holder.tv3.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    // when the image is clicked, update the selected state
-                    ListData data = getItem(position);
-                    data.setChecked(!data.isChecked);
-                    updateCheckedState(holder, data);
-                    return true;
-                }
-            });
+            holder.tv3.setOnClickListener(onClickListener);
+            holder.tv3.setOnLongClickListener(onLongClickListener);
+
             holder.tv4.setText(item.alarm.getAlarmDate());
-            holder.tv4.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Snackbar.make(v, "Show the memo page", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            });
-            holder.tv4.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    // when the image is clicked, update the selected state
-                    ListData data = getItem(position);
-                    data.setChecked(!data.isChecked);
-                    updateCheckedState(holder, data);
-                    return true;
-                }
-            });
+            holder.tv4.setOnClickListener(onClickListener);
+            holder.tv4.setOnLongClickListener(onLongClickListener);
 
             return convertView;
         }
 
-        private void updateCheckedState(ViewHolder holder, ListData item) {
+        private void updateCheckedState(ViewHolder holder, ListData item){
             if (item.isChecked) {
                 holder.imageView.setImageDrawable(mDrawableBuilder.build(" ", 0xff616161));
                 holder.view.setBackgroundColor(HIGHLIGHT_COLOR);
