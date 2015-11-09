@@ -1,12 +1,21 @@
 package ephec.noticeme;
 
+import android.app.AlarmManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.location.LocationManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -22,6 +31,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 
 public class MainActivity extends AppCompatActivity
@@ -30,6 +41,12 @@ public class MainActivity extends AppCompatActivity
     public static FragmentManager fragmentManager;
     private MenuItem itemMenu;
     private Toolbar toolbar;
+    private AlarmManager manager;
+    private PendingIntent pendingIntent;
+    private BroadcastReceiver br;
+    private float radius = 50f;
+    private ArrayList<Alarm> LAlarm = new ArrayList();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,8 +56,15 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setTitle("Memo List");
 
 
+        Bundle extras = getIntent().getExtras();
+        if(extras != null){
+            if(extras.containsKey("Title")){
+                launchMemoAlarms(extras.getString("Title"));
+            }
+        }
+
         TextView userTxtView = (TextView)findViewById(R.id.username);
-        File file = new File(this.getFilesDir(), "user.save");
+        /*File file = new File(this.getFilesDir(), "user.save");
         String line;
         try{
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -52,7 +76,8 @@ public class MainActivity extends AppCompatActivity
         catch(Exception e){
             return;
         }
-        userTxtView.setText(line.split("£")[0]);
+        //separation du email et du mdp venant du fichier
+        userTxtView.setText(line.split("£")[0]);*/
 
         fragmentManager = getSupportFragmentManager();
         // Check that the activity is using the layout version with
@@ -151,6 +176,7 @@ public class MainActivity extends AppCompatActivity
                     "del the selected item",
                     Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
+
             return true;
         }
         if(id == R.id.action_deco){
@@ -215,5 +241,120 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void launchMemoAlarms(String title){
+        DBHelper db = new DBHelper(this.getApplicationContext());
+        db.getReadableDatabase();
+
+        Alarm memo = db.getAlarm(title);
+        db.close();
+        setTimedAlert(memo);
+        setProximityAlert(memo);
+    }
+
+    private void setTimedAlert(Alarm memo) {
+        Intent intent = new Intent("ephec.noticeme");
+        intent.putExtra("memoTitle", memo.getTitle());
+        pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        manager = (AlarmManager) (this
+                .getSystemService(Context.ALARM_SERVICE));
+        manager.set(AlarmManager.RTC, getTime(memo),
+                pendingIntent);
+
+        setup();
+    }
+
+    public long getTime(Alarm memo) {
+        int year;
+        int month;
+        int day;
+        int hour;
+        int minute;
+
+        String[] dueAlarm = memo.getAlarmDate().split(" ");
+        String[] date = dueAlarm[0].split("/");
+        String[] hours = dueAlarm[1].split(":");
+
+        year = Integer.parseInt(date[0]);
+        month = Integer.parseInt(date[1]);
+        day = Integer.parseInt(date[2]);
+        hour = Integer.parseInt(hours[0]);
+        minute = Integer.parseInt(hours[1]);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month, day, hour, minute, 0);
+
+        long value = calendar.getTimeInMillis();
+
+        return value;
+    }
+
+    private void setProximityAlert(Alarm memo) {
+        LocationManager locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        Intent intent = new Intent("ephec.noticeme");
+        intent.putExtra("memoTitle", memo.getTitle());
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
+
+        setup();
+    }
+
+    // Prépare the alarm.
+    public void setup() {
+
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context c, Intent i) {
+
+                launchNotification(i.getExtras().getString("memoTitle"));
+                c.unregisterReceiver(br);
+            }
+        };
+        registerReceiver(br, new IntentFilter("ephec.noticeme"));
+    }
+
+    public void launchNotification(String title) {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("You have a new memo!")
+                        .setContentText("Click to see your memo.");
+
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this.getApplicationContext(), MemoOverviewActivity.class);
+        //Intent resultIntent = new Intent(this.getApplicationContext(), MainActivity.class);
+        resultIntent.putExtra("memoTitle", title);
+
+        // The stack builder object will contain an artificial back stack for the
+        // started Activity.
+        // This ensures that navigating backward from the Activity leads out of
+        // your application to the Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(MainActivity.class);
+
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // mId allows you to update the notification later on.
+        int mId = 1;
+        mNotificationManager.notify(mId, mBuilder.build());
+    }
+
+    public void addAlarm(Alarm alarm){
+        LAlarm.add(alarm);
     }
 }

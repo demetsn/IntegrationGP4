@@ -137,8 +137,7 @@ public class AddMemoActivity extends AppCompatActivity
 
                 if(db.addAlarm(memo))
                 {
-                    launchNotification();
-
+                    //launchNotification();
                     Intent save = new Intent(this, MainActivity.class);
                     startActivity(save);
                 }
@@ -227,8 +226,19 @@ public class AddMemoActivity extends AppCompatActivity
                             @Override
                             public void onDateSet(DatePicker view, int thisYear,
                                                   int monthOfYear, int dayOfMonth) {
-                                date.setText(dayOfMonth + "/"
-                                        + (monthOfYear + 1) + "/" + thisYear);
+                                String m;
+                                String d;
+                                if(dayOfMonth<10){
+                                    d = "0"+dayOfMonth;
+                                }else{
+                                    d = ""+dayOfMonth;
+                                }if(monthOfYear<10){
+                                    m = "0"+(monthOfYear + 1);
+                                }else{
+                                    m = ""+(monthOfYear + 1);
+                                }
+                                date.setText(thisYear + "/"
+                                        + m + "/" + d);
 
                             }
                         }, year, month, day);

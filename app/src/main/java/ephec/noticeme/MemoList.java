@@ -1,5 +1,6 @@
 package ephec.noticeme;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -12,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -107,6 +109,9 @@ public class MemoList extends Fragment {
                 public void onClick(View v) {
                     Snackbar.make(v, "Show the memo page", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
+                    Intent intent = new Intent(getActivity(), MemoOverviewActivity.class);
+                    intent.putExtra("memoTitle",getItem(position).alarm.getTitle());
+                    startActivity(intent);
                 }
             };
             View.OnLongClickListener onLongClickListener = new View.OnLongClickListener() {
@@ -120,17 +125,14 @@ public class MemoList extends Fragment {
                 }
             };
 
+            holder.lL.setOnClickListener(onClickListener);
+            holder.lL.setOnLongClickListener(onLongClickListener);
+
             holder.textView.setText(item.alarm.getTitle());
-            holder.textView.setOnClickListener(onClickListener);
-            holder.textView.setOnLongClickListener(onLongClickListener);
 
             holder.tv3.setText(item.alarm.getDescription());
-            holder.tv3.setOnClickListener(onClickListener);
-            holder.tv3.setOnLongClickListener(onLongClickListener);
-
             holder.tv4.setText(item.alarm.getAlarmDate());
-            holder.tv4.setOnClickListener(onClickListener);
-            holder.tv4.setOnLongClickListener(onLongClickListener);
+
 
             return convertView;
         }
@@ -160,6 +162,7 @@ public class MemoList extends Fragment {
         private ImageView checkIcon;
         private TextView tv3;
         private TextView tv4;
+        private LinearLayout lL;
 
         private ViewHolder(View view) {
             this.view = view;
@@ -168,6 +171,7 @@ public class MemoList extends Fragment {
             checkIcon = (ImageView) view.findViewById(R.id.check_icon);
             tv3 = (TextView) view.findViewById(R.id.textView3);
             tv4 = (TextView) view.findViewById(R.id.textView4);
+            lL = (LinearLayout) view.findViewById(R.id.lineLayoutID);
         }
     }
 

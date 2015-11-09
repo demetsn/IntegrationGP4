@@ -344,7 +344,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 */
 
 
-                URL url= new URL("http://superpie.ddns.net:8035/NoticeMe/web/app_dev.php/android/login");
+                /*URL url= new URL("http://superpie.ddns.net:8035/NoticeMe/web/app_dev.php/android/login");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setReadTimeout(10000);
                 conn.setConnectTimeout(15000);
@@ -370,14 +370,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 bufferedReader.close();
                 inputStream.close();
                 conn.disconnect();
-
+                */
 
             }catch (Exception e){
                 System.out.println("Une exeption s'est produite : "+e);
                 return false;
             }
 
-            if(response.equals("1")){
+            /*if(response.equals("1")){
                 String filename = "user.save";
                 File file = new File(LoginActivity.this.getApplicationContext().getFilesDir(), filename);
                 FileOutputStream outputStream;
@@ -392,9 +392,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
                 return true;
             }else if(response.equals("0")){
-                return false;
-            }
-            return false;
+                return true;
+                //TODO METTRE EN FALSE
+                //return false;
+            }*/
+            return true;
+            //TODO METTRE EN FALSE
+            //return false;
         }
 
         @Override

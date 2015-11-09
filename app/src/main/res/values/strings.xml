@@ -81,4 +81,5 @@
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_edit_profile">Edit Profile</string>
     <string name="title_activity_add_memo">Add Memo</string>
+    <string name="title_activity_memo_overview">Memo overview</string>
 </resources>
