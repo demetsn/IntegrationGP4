@@ -131,7 +131,7 @@ public class MemoList extends Fragment {
             holder.textView.setText(item.alarm.getTitle());
 
             holder.tv3.setText(item.alarm.getDescription());
-            holder.tv4.setText(item.alarm.getAlarmDate());
+            holder.tv4.setText(item.alarm.getAlarmDate().replace('&', ' '));
 
 
             return convertView;
@@ -139,11 +139,13 @@ public class MemoList extends Fragment {
 
         private void updateCheckedState(ViewHolder holder, ListData item){
             if (item.isChecked) {
+                MainActivity.removeAlarm(item.alarm);
                 holder.imageView.setImageDrawable(mDrawableBuilder.build(" ", 0xff616161));
                 holder.view.setBackgroundColor(HIGHLIGHT_COLOR);
                 holder.checkIcon.setVisibility(View.VISIBLE);
             }
             else {
+                MainActivity.addAlarm(item.alarm);
                 TextDrawable drawable = mDrawableBuilder.build(
                         String.valueOf(item.alarm.getTitle().charAt(0)),
                         mColorGenerator.getColor(item.alarm.getTitle()));

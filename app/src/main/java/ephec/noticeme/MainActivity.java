@@ -1,6 +1,8 @@
 package ephec.noticeme;
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
@@ -9,6 +11,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.LocationManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -33,19 +37,21 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 
-
+//TODO EMPECHER LE ROTATE
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static FragmentManager fragmentManager;
     private MenuItem itemMenu;
     private Toolbar toolbar;
-    private AlarmManager manager;
-    private PendingIntent pendingIntent;
     private BroadcastReceiver br;
     private float radius = 50f;
-    private ArrayList<Alarm> LAlarm = new ArrayList();
+    private static ArrayList<Alarm> LAlarm = new ArrayList();
+    private static int mNotificationId = 0;
+    NotificationCompat.Builder builder;
+    private NotificationManager mNotificationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,6 +183,16 @@ public class MainActivity extends AppCompatActivity
                     Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
 
+            DBHelper db = new DBHelper(this.getApplicationContext());
+            db.getReadableDatabase();
+
+            Iterator<Alarm> it = LAlarm.iterator();
+            while(it.hasNext()){
+                Alarm temp = it.next();
+                db.deleteAlarm(temp.getTitle());
+            }
+            db.close();
+
             return true;
         }
         if(id == R.id.action_deco){
@@ -202,7 +218,6 @@ public class MainActivity extends AppCompatActivity
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         Fragment newFragment=null;
-
 
         if (id == R.id.nav_list) {
             newFragment = new MemoList();
@@ -237,7 +252,6 @@ public class MainActivity extends AppCompatActivity
             transaction.commit();
         }
 
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -249,19 +263,22 @@ public class MainActivity extends AppCompatActivity
 
         Alarm memo = db.getAlarm(title);
         db.close();
-        setTimedAlert(memo);
+        if(memo.getAlarmDate().equals("&")){
+
+        }else{
+            setTimedAlert(memo);
+        }
         setProximityAlert(memo);
     }
 
+    @SuppressLint("NewApi")
     private void setTimedAlert(Alarm memo) {
         Intent intent = new Intent("ephec.noticeme");
         intent.putExtra("memoTitle", memo.getTitle());
-        pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        manager = (AlarmManager) (this
-                .getSystemService(Context.ALARM_SERVICE));
-        manager.set(AlarmManager.RTC, getTime(memo),
-                pendingIntent);
+        AlarmManager manager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        manager.setExact(AlarmManager.RTC, getTime(memo), pendingIntent);
 
         setup();
     }
@@ -273,22 +290,22 @@ public class MainActivity extends AppCompatActivity
         int hour;
         int minute;
 
-        String[] dueAlarm = memo.getAlarmDate().split(" ");
+        String[] dueAlarm = memo.getAlarmDate().split("&");
         String[] date = dueAlarm[0].split("/");
         String[] hours = dueAlarm[1].split(":");
 
         year = Integer.parseInt(date[0]);
-        month = Integer.parseInt(date[1]);
+        month = Integer.parseInt(date[1])-1;
         day = Integer.parseInt(date[2]);
+
         hour = Integer.parseInt(hours[0]);
         minute = Integer.parseInt(hours[1]);
 
         Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.set(year, month, day, hour, minute, 0);
 
-        long value = calendar.getTimeInMillis();
-
-        return value;
+        return calendar.getTimeInMillis();
     }
 
     private void setProximityAlert(Alarm memo) {
@@ -296,7 +313,7 @@ public class MainActivity extends AppCompatActivity
 
         Intent intent = new Intent("ephec.noticeme");
         intent.putExtra("memoTitle", memo.getTitle());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
 
@@ -310,51 +327,79 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onReceive(Context c, Intent i) {
 
-                launchNotification(i.getExtras().getString("memoTitle"));
+                launchNotification(i.getExtras().getString("memoTitle"),"La description a lancer et faut recuperer");
                 c.unregisterReceiver(br);
             }
         };
         registerReceiver(br, new IntentFilter("ephec.noticeme"));
     }
 
-    public void launchNotification(String title) {
-        NotificationCompat.Builder mBuilder =
+    public void launchNotification(String title,String description){
+        mNotificationManager = (NotificationManager)
+                getSystemService(NOTIFICATION_SERVICE);
+
+        // Sets up the Snooze and Dismiss action buttons that will appear in the
+        // expanded view of the notification.
+        Intent dismissIntent = new Intent(this, MemoOverviewActivity.class);
+        dismissIntent.setAction("ACTION_DISMISS");
+        dismissIntent.putExtra("memoTitle", title);
+        PendingIntent piDismiss = PendingIntent.getService(this, 0, dismissIntent, 0);
+
+        Intent snoozeIntent = new Intent(this, MemoOverviewActivity.class);
+        snoozeIntent.setAction("ACTION_SNOOZE");
+        snoozeIntent.putExtra("memoTitle", title);
+        PendingIntent piSnooze = PendingIntent.getService(this, 0, snoozeIntent, 0);
+
+        // Constructs the Builder object.
+        builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("You have a new memo!")
-                        .setContentText("Click to see your memo.");
+                        .setContentTitle("NoticeMe notification")
+                        .setContentText(title)
+                        .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
+                /*
+                 * Sets the big view "big text" style and supplies the
+                 * text (the user's reminder message) that will be displayed
+                 * in the detail area of the expanded notification.
+                 * These calls are ignored by the support library for
+                 * pre-4.1 devices.
+                 */
+                        .setStyle(new NotificationCompat.BigTextStyle()
+                                .bigText(description))
+                        .addAction (R.drawable.ic_action_cancel,
+                                "dismiss", piDismiss)
+                        .addAction (R.drawable.ic_action_plus,
+                                "Snooze", piSnooze);
 
-        // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(this.getApplicationContext(), MemoOverviewActivity.class);
-        //Intent resultIntent = new Intent(this.getApplicationContext(), MainActivity.class);
+        /*
+         * Clicking the notification itself displays ResultActivity, which provides
+         * UI for snoozing or dismissing the notification.
+         * This is available through either the normal view or big view.
+         */
+        Intent resultIntent = new Intent(this, MemoOverviewActivity.class);
         resultIntent.putExtra("memoTitle", title);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        // The stack builder object will contain an artificial back stack for the
-        // started Activity.
-        // This ensures that navigating backward from the Activity leads out of
-        // your application to the Home screen.
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-
-        // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(MainActivity.class);
-
-        // Adds the Intent that starts the Activity to the top of the stack
-        stackBuilder.addNextIntent(resultIntent);
+        // Because clicking the notification opens a new ("special") activity, there's
+        // no need to create an artificial back stack.
         PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
+                PendingIntent.getActivity(
+                        this,
                         0,
+                        resultIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
 
-        mBuilder.setContentIntent(resultPendingIntent);
-        NotificationManager mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        builder.setContentIntent(resultPendingIntent);
+        mNotificationId++;
+        mNotificationManager.notify(mNotificationId, builder.build());
 
-        // mId allows you to update the notification later on.
-        int mId = 1;
-        mNotificationManager.notify(mId, mBuilder.build());
     }
 
-    public void addAlarm(Alarm alarm){
+    public static void addAlarm(Alarm alarm){
         LAlarm.add(alarm);
+    }
+    public static void removeAlarm(Alarm alarm){
+        LAlarm.remove(alarm);
     }
 }
