@@ -284,19 +284,21 @@ public class MainActivity extends AppCompatActivity
         }else{
             setTimedAlert(memo);
         }
-        setProximityAlert(memo);
+        //setProximityAlert(memo);
     }
 
     @SuppressLint("NewApi")
     private void setTimedAlert(Alarm memo) {
-        Intent intent = new Intent("ephec.noticeme");
-        intent.putExtra("memoTitle", memo.getTitle());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        //Intent intent = new Intent("ephec.noticeme");
+        Intent intentAlarm = new Intent(this,AlarmReceiver.class);
+        intentAlarm.putExtra("memoTitle", memo.getTitle());
+        intentAlarm.putExtra("desc","Location notification");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intentAlarm, 0);
 
-        AlarmManager manager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        manager.setExact(AlarmManager.RTC, getTime(memo), pendingIntent);
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        manager.setExact(AlarmManager.RTC_WAKEUP, getTime(memo), pendingIntent);
 
-        setup();
+        //setup();
     }
 
     public long getTime(Alarm memo) {
@@ -329,10 +331,10 @@ public class MainActivity extends AppCompatActivity
 
         Intent intent = new Intent("ephec.noticeme");
         intent.putExtra("memoTitle", memo.getTitle());
+        intent.putExtra("desc","Location notification");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
-
         setup();
     }
 
@@ -343,7 +345,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onReceive(Context c, Intent i) {
 
-                launchNotification(i.getExtras().getString("memoTitle"),"La description a lancer et faut recuperer");
+                launchNotification(i.getExtras().getString("memoTitle"),i.getExtras().getString("desc"));
                 c.unregisterReceiver(br);
             }
         };
@@ -370,8 +372,8 @@ public class MainActivity extends AppCompatActivity
         builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("NoticeMe notification")
-                        .setContentText(title)
+                        .setContentTitle(title)
+                        .setContentText(description)
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
                 /*
