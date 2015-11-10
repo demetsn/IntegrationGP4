@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+//TODO BUG SI AJOUT JUSTE DE DATE OU JUSTE TIME
 public class AddMemoActivity extends AppCompatActivity
         implements
         View.OnClickListener,
@@ -182,15 +183,19 @@ public class AddMemoActivity extends AppCompatActivity
                     try{
                         addresses = geocode.getFromLocation(location.getLatitude(), location.getLongitude(),1);
                     }catch (IOException e){
-
+                        System.out.println(e);
                     }
-                    mMarker = mMap.addMarker(new MarkerOptions()
-                        .position(loc)
-                        .title("Tap the screen to update location")
-                        .snippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality())
-                        .draggable(true)
-                    );
-                    mMarker.showInfoWindow();
+                    try{
+                        mMarker = mMap.addMarker(new MarkerOptions()
+                                        .position(loc)
+                                        .title("Tap the screen to update location")
+                                        .snippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality())
+                                        .draggable(true)
+                        );
+                        mMarker.showInfoWindow();
+                    }catch (NullPointerException e){
+                        System.out.println(e);
+                    }
                     mMap.animateCamera((CameraUpdateFactory.newLatLngZoom(loc, 13)));
                     markerCount = 1;
                 }
@@ -203,12 +208,15 @@ public class AddMemoActivity extends AppCompatActivity
                 List<Address> addresses = null;
                 try{
                     addresses = geocode.getFromLocation(latLng.latitude, latLng.longitude,1);
+                    mMarker.setPosition(latLng);
+                    mMarker.setSnippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality());
+                    mMarker.showInfoWindow();
                 }catch (IOException e){
 
+                }catch (NullPointerException e){
+
                 }
-                mMarker.setPosition(latLng);
-                mMarker.setSnippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality());
-                mMarker.showInfoWindow();
+
             }
         });
 

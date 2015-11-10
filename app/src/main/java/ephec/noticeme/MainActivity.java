@@ -39,8 +39,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 
-//TODO EMPECHER LE ROTATE
-//TODO BUG AVEC ONBACKONPRESSED
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -49,7 +48,8 @@ public class MainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private BroadcastReceiver br;
     private float radius = 50f;
-    //private static ArrayList<Alarm> LAlarm = new ArrayList();
+    private static ArrayList<Alarm> LAlarm ;
+    private static ArrayList<Alarm> AlarmToRestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Memo List");
-
+        LAlarm = new ArrayList<>();
 
         Bundle extras = getIntent().getExtras();
         if(extras != null){
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            //super.onBackPressed();
         }
     }
 
@@ -172,47 +172,66 @@ public class MainActivity extends AppCompatActivity
                     "refresh the list with the server",
                     Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            Fragment newFragment = new MemoList();
+            toolbar.setTitle("Memo List");
+            itemMenu.setVisible(true);
+            transaction.replace(R.id.fragment_container, newFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
             return true;
         }
         if(id == R.id.action_delete){
-            //DBHelper db = new DBHelper(this.getApplicationContext());
-            //db.getReadableDatabase();
+            DBHelper db = new DBHelper(this.getApplicationContext());
+            db.getReadableDatabase();
+            AlarmToRestore = new ArrayList<>();
 
-            /*Iterator<Alarm> it = LAlarm.iterator();
+            Iterator<Alarm> it = LAlarm.iterator();
             while(it.hasNext()){
                 Alarm temp = it.next();
-                System.out.println(temp.getTitle());
+                AlarmToRestore.add(temp);
                 db.deleteAlarm(temp.getTitle());
                 //MemoList.hideAlarm(temp);
             }
             db.close();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            Fragment newFragment = new MemoList();
+            toolbar.setTitle("Memo List");
+            itemMenu.setVisible(true);
+            transaction.replace(R.id.fragment_container, newFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+            if(!AlarmToRestore.isEmpty()){
+                Snackbar.make(
+                        findViewById(android.R.id.content),
+                        "Selected item deleted",
+                        Snackbar.LENGTH_LONG)
+                        .setAction("Undo", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                DBHelper db = new DBHelper(v.getContext());
+                                db.getReadableDatabase();
+                                Iterator<Alarm> iterator = AlarmToRestore.iterator();
+                                while(iterator.hasNext()){
+                                    Alarm temp = iterator.next();
+                                    db.addAlarm(temp);
+                                }
+                                db.close();
+                                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                                Fragment newFragment = new MemoList();
+                                transaction.replace(R.id.fragment_container, newFragment);
+                                transaction.addToBackStack(null);
+                                transaction.commit();
 
-            Snackbar.make(
-                    findViewById(android.R.id.content),
-                    "Selected item deleted",
-                    Snackbar.LENGTH_LONG)
-                    .setAction("Undo", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            DBHelper db = new DBHelper(v.getContext());
-                            db.getReadableDatabase();
-                            Iterator<Alarm> iterator = LAlarm.iterator();
-                            while(iterator.hasNext()){
-                                Alarm temp = iterator.next();
-                                db.addAlarm(temp);
-                                //MemoList.showAlarm(temp);
                             }
-                            db.close();
-                        }
-                    }).show();*/
-
+                        }).show();
+            }
             return true;
         }
         if(id == R.id.action_deco){
             String filename = "user.save";
             File file = new File(this.getFilesDir(), filename);
             Boolean del = file.delete();
-            System.out.println(del);
             if(del){
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
@@ -276,9 +295,7 @@ public class MainActivity extends AppCompatActivity
 
         Alarm memo = db.getAlarm(title);
         db.close();
-        if(memo.getAlarmDate().equals("&")){
-
-        }else{
+        if(!memo.getAlarmDate().equals("&")){
             setTimedAlert(memo);
         }
         //setProximityAlert(memo);
@@ -402,10 +419,14 @@ public class MainActivity extends AppCompatActivity
 
     }*/
 
-    /*public static void addAlarm(Alarm alarm){
+    public static void addAlarm(Alarm alarm){
         LAlarm.add(alarm);
     }
     public static void removeAlarm(Alarm alarm){
         LAlarm.remove(alarm);
-    }*/
+    }
+    public static void clearList(){
+        LAlarm = new ArrayList<>();
+    }
+
 }
