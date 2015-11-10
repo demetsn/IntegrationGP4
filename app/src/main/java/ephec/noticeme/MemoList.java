@@ -34,6 +34,7 @@ public class MemoList extends Fragment {
     private ColorGenerator mColorGenerator = ColorGenerator.MATERIAL;
     private TextDrawable.IBuilder mDrawableBuilder;
     private ArrayList<ListData> mDataList = new ArrayList();
+    //private static SampleAdapter sampleAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -44,6 +45,7 @@ public class MemoList extends Fragment {
         mDrawableBuilder = TextDrawable.builder()
                 .round();
         ListView listView = (ListView) view.findViewById(R.id.listView);
+
         listView.setAdapter(new SampleAdapter());
 
         return view;
@@ -107,8 +109,6 @@ public class MemoList extends Fragment {
             View.OnClickListener onClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Snackbar.make(v, "Show the memo page", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
                     Intent intent = new Intent(getActivity(), MemoOverviewActivity.class);
                     intent.putExtra("memoTitle",getItem(position).alarm.getTitle());
                     startActivity(intent);
@@ -139,13 +139,13 @@ public class MemoList extends Fragment {
 
         private void updateCheckedState(ViewHolder holder, ListData item){
             if (item.isChecked) {
-                MainActivity.removeAlarm(item.alarm);
+                //MainActivity.removeAlarm(item.alarm);
                 holder.imageView.setImageDrawable(mDrawableBuilder.build(" ", 0xff616161));
                 holder.view.setBackgroundColor(HIGHLIGHT_COLOR);
                 holder.checkIcon.setVisibility(View.VISIBLE);
             }
             else {
-                MainActivity.addAlarm(item.alarm);
+                //MainActivity.addAlarm(item.alarm);
                 TextDrawable drawable = mDrawableBuilder.build(
                         String.valueOf(item.alarm.getTitle().charAt(0)),
                         mColorGenerator.getColor(item.alarm.getTitle()));
@@ -191,5 +191,15 @@ public class MemoList extends Fragment {
             this.isChecked = isChecked;
         }
     }
+
+    /*public static void hideAlarm(Alarm alarm){
+        ListData temp = new ListData(alarm);
+        mDataList.remove(temp);
+        sampleAdapter.notifyDataSetChanged();
+    }
+    public static void showAlarm(Alarm alarm){
+        mDataList.add(new ListData(alarm));
+        sampleAdapter.notifyDataSetChanged();
+    }*/
 
 }

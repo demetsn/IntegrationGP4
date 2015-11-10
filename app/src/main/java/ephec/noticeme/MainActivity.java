@@ -40,6 +40,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 
 //TODO EMPECHER LE ROTATE
+//TODO BUG AVEC ONBACKONPRESSED
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private BroadcastReceiver br;
     private float radius = 50f;
-    private static ArrayList<Alarm> LAlarm = new ArrayList();
+    //private static ArrayList<Alarm> LAlarm = new ArrayList();
     private static int mNotificationId = 0;
     NotificationCompat.Builder builder;
     private NotificationManager mNotificationManager;
@@ -177,21 +178,36 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         if(id == R.id.action_delete){
-            Snackbar.make(
-                    findViewById(android.R.id.content),
-                    "del the selected item",
-                    Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+            //DBHelper db = new DBHelper(this.getApplicationContext());
+            //db.getReadableDatabase();
 
-            DBHelper db = new DBHelper(this.getApplicationContext());
-            db.getReadableDatabase();
-
-            Iterator<Alarm> it = LAlarm.iterator();
+            /*Iterator<Alarm> it = LAlarm.iterator();
             while(it.hasNext()){
                 Alarm temp = it.next();
+                System.out.println(temp.getTitle());
                 db.deleteAlarm(temp.getTitle());
+                //MemoList.hideAlarm(temp);
             }
             db.close();
+
+            Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "Selected item deleted",
+                    Snackbar.LENGTH_LONG)
+                    .setAction("Undo", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            DBHelper db = new DBHelper(v.getContext());
+                            db.getReadableDatabase();
+                            Iterator<Alarm> iterator = LAlarm.iterator();
+                            while(iterator.hasNext()){
+                                Alarm temp = iterator.next();
+                                db.addAlarm(temp);
+                                //MemoList.showAlarm(temp);
+                            }
+                            db.close();
+                        }
+                    }).show();*/
 
             return true;
         }
@@ -356,6 +372,7 @@ public class MainActivity extends AppCompatActivity
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("NoticeMe notification")
                         .setContentText(title)
+                        .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
                 /*
                  * Sets the big view "big text" style and supplies the
@@ -396,10 +413,10 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public static void addAlarm(Alarm alarm){
+    /*public static void addAlarm(Alarm alarm){
         LAlarm.add(alarm);
     }
     public static void removeAlarm(Alarm alarm){
         LAlarm.remove(alarm);
-    }
+    }*/
 }
