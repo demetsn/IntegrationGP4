@@ -1,182 +1,205 @@
 package ephec.noticeme;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.amulyakhare.textdrawable.util.ColorGenerator;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link MemoList.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link MemoList#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class MemoList extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final int HIGHLIGHT_COLOR = 0x999be6ff;
 
-    String alarmTitle;
-    private ListView lv;
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MemoList.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MemoList newInstance(String param1, String param2) {
-        MemoList fragment = new MemoList();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public MemoList() {
-        // Required empty public constructor
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
+    private ColorGenerator mColorGenerator = ColorGenerator.MATERIAL;
+    private TextDrawable.IBuilder mDrawableBuilder;
+    private ArrayList<ListData> mDataList = new ArrayList();
+    //private static SampleAdapter sampleAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_memo_list, container, false);
+        fillMemoList();
+        mDrawableBuilder = TextDrawable.builder()
+                .round();
+        ListView listView = (ListView) view.findViewById(R.id.listView);
 
-        this.lv = (ListView) view.findViewById(R.id.memoList);
-        fillMemoList("title","");
+        listView.setAdapter(new SampleAdapter());
 
         return view;
     }
+    private void fillMemoList() {
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
-    }
-
-    private void fillMemoList(String category, String param) {
-
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
         DBHelper db = new DBHelper(getActivity());
-
         db.getWritableDatabase();
 
-        ArrayList<String> memos = db.getAllTitles(category,param);
-        memos.toArray();
-
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_single_choice,memos );
-        lv.setAdapter(arrayAdapter);
-        lv.setItemChecked(0, true);
-        lv.requestFocusFromTouch();
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
-
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                alarmTitle = (String) adapter.getItemAtPosition(position);
-                Fragment newFragment = new AddMemo();
-
-                //Ajout d'une variable dans au frgament grace au Bundle
-                Bundle args = new Bundle();
-                args.putString("title", alarmTitle);
-                newFragment.setArguments(args);
-
-                transaction.replace(R.id.fragment_container, newFragment);
-                transaction.setBreadCrumbTitle(alarmTitle);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
-        });
-        lv.setSelection(0);
-
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
+        ArrayList<Alarm> memos = db.getAllAlarm();
+        Iterator<Alarm> it = memos.iterator();
+        while(it.hasNext()){
+            Alarm temp = it.next();
+            mDataList.add(new ListData(temp));
         }
 
-        Integer Position = lv.getCheckedItemPosition();
-        alarmTitle = lv.getItemAtPosition(Position).toString();
-
-        return super.onOptionsItemSelected(item);
-
-    }
-    public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
-        alarmTitle = (String) adapter.getItemAtPosition(position);
-
-        Intent modMemo = new Intent(getActivity(), AddMemo.class);
-        modMemo.putExtra("title", alarmTitle);
-        startActivity(modMemo);
     }
 
-    private String getMemoTitle(int Position){
-        String memoFound;
-        memoFound = (String) lv.getItemAtPosition(Position);
-        return memoFound;
+    private class SampleAdapter extends BaseAdapter {
+
+        @Override
+        public int getCount() {
+            return mDataList.size();
+        }
+
+        @Override
+        public ListData getItem(int position) {
+            return mDataList.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            final ViewHolder holder;
+            if (convertView == null) {
+                convertView = View.inflate(MemoList.this.getActivity(), R.layout.list_item_layout, null);
+                holder = new ViewHolder(convertView);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            ListData item = getItem(position);
+
+            // provide support for selected state
+            updateCheckedState(holder, item);
+            holder.imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // when the image is clicked, update the selected state
+                    ListData data = getItem(position);
+                    data.setChecked(!data.isChecked);
+                    updateCheckedState(holder, data);
+                }
+            });
+
+            View.OnClickListener onClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), MemoOverviewActivity.class);
+                    intent.putExtra("memoTitle",getItem(position).alarm.getTitle());
+                    startActivity(intent);
+                }
+            };
+            View.OnLongClickListener onLongClickListener = new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    // when the image is clicked, update the selected state
+                    ListData data = getItem(position);
+                    data.setChecked(!data.isChecked);
+                    updateCheckedState(holder, data);
+                    return true;
+                }
+            };
+
+            holder.lL.setOnClickListener(onClickListener);
+            holder.lL.setOnLongClickListener(onLongClickListener);
+
+            holder.textView.setText(item.alarm.getTitle());
+
+            holder.tv3.setText(item.alarm.getDescription());
+            holder.tv4.setText(item.alarm.getAlarmDate().replace('&', ' '));
+
+
+            return convertView;
+        }
+
+        private void updateCheckedState(ViewHolder holder, ListData item){
+            if (item.isChecked) {
+                //MainActivity.removeAlarm(item.alarm);
+                holder.imageView.setImageDrawable(mDrawableBuilder.build(" ", 0xff616161));
+                holder.view.setBackgroundColor(HIGHLIGHT_COLOR);
+                holder.checkIcon.setVisibility(View.VISIBLE);
+            }
+            else {
+                //MainActivity.addAlarm(item.alarm);
+                TextDrawable drawable = mDrawableBuilder.build(
+                        String.valueOf(item.alarm.getTitle().charAt(0)),
+                        mColorGenerator.getColor(item.alarm.getTitle()));
+                holder.imageView.setImageDrawable(drawable);
+                holder.view.setBackgroundColor(Color.TRANSPARENT);
+                holder.checkIcon.setVisibility(View.GONE);
+            }
+        }
     }
+
+    private static class ViewHolder {
+
+        private View view;
+        private ImageView imageView;
+        private TextView textView;
+        private ImageView checkIcon;
+        private TextView tv3;
+        private TextView tv4;
+        private LinearLayout lL;
+
+        private ViewHolder(View view) {
+            this.view = view;
+            imageView = (ImageView) view.findViewById(R.id.imageView2);
+            textView = (TextView) view.findViewById(R.id.textView2);
+            checkIcon = (ImageView) view.findViewById(R.id.check_icon);
+            tv3 = (TextView) view.findViewById(R.id.textView3);
+            tv4 = (TextView) view.findViewById(R.id.textView4);
+            lL = (LinearLayout) view.findViewById(R.id.lineLayoutID);
+        }
+    }
+
+    private static class ListData {
+
+        private Alarm alarm;
+
+        private boolean isChecked;
+
+        public ListData(Alarm data) {
+            this.alarm = data;
+        }
+
+        public void setChecked(boolean isChecked) {
+            this.isChecked = isChecked;
+        }
+    }
+
+    /*public static void hideAlarm(Alarm alarm){
+        ListData temp = new ListData(alarm);
+        mDataList.remove(temp);
+        sampleAdapter.notifyDataSetChanged();
+    }
+    public static void showAlarm(Alarm alarm){
+        mDataList.add(new ListData(alarm));
+        sampleAdapter.notifyDataSetChanged();
+    }*/
 
 }

@@ -3,6 +3,7 @@ package ephec.noticeme;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -29,15 +30,24 @@ import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.List;
+import java.security.*;
+import javax.crypto.Cipher;
 
 
 /**
@@ -86,6 +96,31 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        StringBuilder text = new StringBuilder();
+        File file = new File(this.getFilesDir(), "user.save");
+        try{
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = br.readLine()) != null) {
+                text.append(line);
+                text.append('£');
+            }
+            br.close();
+        }catch(FileNotFoundException e){
+            return;
+        }
+        catch(Exception e){
+            return;
+        }
+        if(text.toString().isEmpty()){
+            return;
+        }
+        String fromFile[]= text.toString().split("£");
+        mEmailView.setText(fromFile[0]);
+        mPasswordView.setText(fromFile[1]);
+        attemptLogin();
+        //mPasswordView.requestFocus();
     }
 
     private void populateAutoComplete() {
@@ -264,6 +299,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected Boolean doInBackground(Void... params) {
             String response;
             try {
+                //OLD HASHED PASS
                 MessageDigest digest = MessageDigest.getInstance("SHA-512");
                 byte[] hash = digest.digest(mPassword.getBytes("UTF-8"));
                 StringBuffer hexString = new StringBuffer();
@@ -274,7 +310,41 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
                 String hashed = hexString.toString();
 
-                URL url= new URL("http://superpie.ddns.net:8035/NoticeMe/web/app_dev.php/android/login");
+
+                //generation de cle
+                /*KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+                keyGen.initialize(512);
+                byte[] publicKey = keyGen.genKeyPair().getPublic().getEncoded();
+                byte[] privateKey = keyGen.genKeyPair().getPrivate().getEncoded();
+                */
+                //openssl rsa -pubin -in pubkey.pem -modulus -noout
+                //BigInteger modulus = new BigInteger("the result of pem file", 16);
+                //openssl rsa -pubin -in pubkey.pem -text -noout
+                //BigInteger pubExp = new BigInteger("the result of pem file", 16);
+                /*
+                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(modulus, pubExp);
+                RSAPublicKey key = (RSAPublicKey) keyFactory.generatePublic(pubKeySpec);
+                */
+                /*
+                Cipher cipher = Cipher.getInstance("RSA");
+                cipher.init(Cipher.ENCRYPT_MODE, key);
+                */
+                //encryption
+                //byte[] cipherData = cipher.doFinal(mPassword.getBytes());
+                //translation to string
+                /*
+                StringBuffer hexString = new StringBuffer();
+                for (int i = 0; i < cipherData.length; i++) {
+                    String hex = Integer.toHexString(0xff & cipherData[i]);
+                    if(hex.length() == 1) hexString.append('0');
+                    hexString.append(hex);
+                }
+                String hashed = hexString.toString();
+                */
+
+
+                /*URL url= new URL("http://superpie.ddns.net:8035/NoticeMe/web/app_dev.php/android/login");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setReadTimeout(10000);
                 conn.setConnectTimeout(15000);
@@ -300,35 +370,43 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 bufferedReader.close();
                 inputStream.close();
                 conn.disconnect();
+                */
 
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            } catch (Exception e){
+            }catch (Exception e){
                 System.out.println("Une exeption s'est produite : "+e);
                 return false;
             }
 
-            if(response.equals("1")){
-                System.out.println("Login success!");
+            /*if(response.equals("1")){
+                String filename = "user.save";
+                File file = new File(LoginActivity.this.getApplicationContext().getFilesDir(), filename);
+                FileOutputStream outputStream;
+                try {
+                    outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                    outputStream.write(mEmail.getBytes());
+                    outputStream.write("£".getBytes());
+                    outputStream.write(mPassword.getBytes());
+                    outputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return true;
             }else if(response.equals("0")){
-                System.out.println("Login fail!");
-                return false;
-            }
-            //TODO : register user
-            return false;
+                return true;
+                //TODO METTRE EN FALSE
+                //return false;
+            }*/
+            return true;
+            //TODO METTRE EN FALSE
+            //return false;
         }
 
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
-
             if (success) {
                 Intent intent= new Intent(LoginActivity.this,MainActivity.class);
-                intent.putExtra("email",mEmail);
                 startActivity(intent);
                 //finish();
             } else {
