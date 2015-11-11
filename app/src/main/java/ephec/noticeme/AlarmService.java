@@ -23,6 +23,8 @@ public class AlarmService extends IntentService {
         launchNotification("Titre du memo","Description du memo");
     }
 
+    //TODO REDIRECT WHEN CLICK ON NOTIFICATION
+    //TODO BUTTON SNOOZE AND DISSMISS
     public void launchNotification(String title,String description){
         mNotificationManager = (NotificationManager)
                 this.getSystemService(NOTIFICATION_SERVICE);
