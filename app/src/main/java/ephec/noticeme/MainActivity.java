@@ -5,11 +5,14 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -30,6 +33,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,11 +48,13 @@ import java.util.Iterator;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 5000 ;//en millisecondes
+    private static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 1;
     public static FragmentManager fragmentManager;
     private MenuItem itemMenu;
     private Toolbar toolbar;
     private BroadcastReceiver br;
-    private float radius = 50f;
+    private float radius = 25f;
     //private static ArrayList<Alarm> LAlarm = new ArrayList();
     private static int mNotificationId = 0;
     NotificationCompat.Builder builder;
@@ -289,14 +295,14 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressLint("NewApi")
     private void setTimedAlert(Alarm memo) {
-        Intent intent = new Intent("ephec.noticeme");
+        Intent intent = new Intent("ephec.noticeme.timedAlert");
         intent.putExtra("memoTitle", memo.getTitle());
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         AlarmManager manager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        manager.setExact(AlarmManager.RTC, getTime(memo), pendingIntent);
+        manager.setExact(AlarmManager.RTC_WAKEUP, getTime(memo), pendingIntent);
 
-        setup();
+        timedSetup();
     }
 
     public long getTime(Alarm memo) {
@@ -327,17 +333,87 @@ public class MainActivity extends AppCompatActivity
     private void setProximityAlert(Alarm memo) {
         LocationManager locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        Intent intent = new Intent("ephec.noticeme");
+        /*LocationListener locListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        locManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                MINIMUM_TIME_BETWEEN_UPDATE,
+                MINIMUM_DISTANCECHANGE_FOR_UPDATE,
+                locListener
+        );
+
+        locManager.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER,
+                1000,
+                MINIMUM_DISTANCECHANGE_FOR_UPDATE,
+                locListener
+        );*/
+
+
+        Intent intent = new Intent("ephec.noticceme"+memo.getTitle());
         intent.putExtra("memoTitle", memo.getTitle());
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
 
-        setup();
+        geoSetup(memo.getTitle());
     }
 
     // Prépare the alarm.
-    public void setup() {
+    public void geoSetup(String title) {
+
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context c, Intent i) {
+
+                launchNotification(i.getExtras().getString("memoTitle"), "La description a lancer et faut recuperer");
+                removeProximityAlert(i.getExtras().getString("memoTitle"));
+                c.unregisterReceiver(br);
+            }
+        };
+        registerReceiver(br, new IntentFilter("ephec.noticceme"+title));
+    }
+
+
+    private void removeProximityAlert(String title) {
+
+        String context = Context.LOCATION_SERVICE;
+        LocationManager locationManager = (LocationManager) getSystemService(context);
+
+        DBHelper db = new DBHelper(this.getApplicationContext());
+        db.getReadableDatabase();
+
+        Alarm memo = db.getAlarm(title);
+        db.close();
+
+        Intent anIntent = new Intent("ephec.noticeme");
+        PendingIntent operation =
+                PendingIntent.getBroadcast(getApplicationContext(), memo.getId() , anIntent, 0);
+        locationManager.removeProximityAlert(operation);
+    }
+
+
+    public void timedSetup() {
 
         br = new BroadcastReceiver() {
             @Override
@@ -347,7 +423,7 @@ public class MainActivity extends AppCompatActivity
                 c.unregisterReceiver(br);
             }
         };
-        registerReceiver(br, new IntentFilter("ephec.noticeme"));
+        registerReceiver(br, new IntentFilter("ephec.noticeme.proxAlert"));
     }
 
     public void launchNotification(String title,String description){
@@ -370,7 +446,7 @@ public class MainActivity extends AppCompatActivity
         builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("NoticeMe notification")
+                        .setContentTitle(title)
                         .setContentText(title)
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
