@@ -54,6 +54,8 @@ public class AddMemoActivity extends AppCompatActivity
     private Marker mMarker;
     private Geocoder geocode;
     private static int markerCount;
+    private boolean isUpdate;
+    private int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +73,32 @@ public class AddMemoActivity extends AppCompatActivity
         this.date.setOnClickListener(this);
         this.time = (TextView) this.findViewById(R.id.memo_textTime);
         this.time.setOnClickListener(this);
+        this.isUpdate = false;
+
+        Bundle extras = getIntent().getExtras();
+        String alarmTitle = "";
+        Alarm memo;
+        if(extras != null){
+            this.isUpdate = true;
+            alarmTitle = extras.getString("memoTitle");
+            DBHelper db = new DBHelper(this);
+            db.getReadableDatabase();
+
+            memo = db.getAlarm(alarmTitle);
+            db.close();
+            this.id = memo.getId();
+            this.title.setText(memo.getTitle());
+            this.description.setText(memo.getDescription());
+            if(!memo.getAlarmDate().equals("&")){
+                String temp[] = memo.getAlarmDate().split("&");
+                this.date.setText(temp[0]);
+                this.time.setText(temp[1]);
+            }
+
+            this.loc = new LatLng(memo.getLatitude(),memo.getLongitude());
+        }
+
+
 
         final ScrollView mainSW = (ScrollView) this.findViewById(R.id.scrollView);
         ImageView transparentImg = (ImageView) this.findViewById(R.id.transparent_image);
@@ -130,19 +158,31 @@ public class AddMemoActivity extends AppCompatActivity
                 memo.setLatitude(mMarker.getPosition().latitude);
                 memo.setLongitude(mMarker.getPosition().longitude);
 
-                Random rn1 = new Random();
-                memo.setId(rn1.nextInt(10000));
+                if(!isUpdate){
+                    Random rn1 = new Random();
+                    memo.setId(rn1.nextInt(10000));
+                }else{
+                    memo.setId(this.id);
+                }
                 memo.setGroupId(0);
 
                 DBHelper db = new DBHelper(this);
-
-                if(db.addAlarm(memo))
-                {
-                    //launchNotification();
+                if(isUpdate){
+                    db.modifyAlarm(memo);
                     Intent save = new Intent(this, MainActivity.class);
                     save.putExtra("Title",memo.getTitle());
                     startActivity(save);
+
+                }else{
+                    if(db.addAlarm(memo))
+                    {
+                        //launchNotification();
+                        Intent save = new Intent(this, MainActivity.class);
+                        save.putExtra("Title",memo.getTitle());
+                        startActivity(save);
+                    }
                 }
+
 
                 return true;
             case R.id.action_cancel:
@@ -178,10 +218,13 @@ public class AddMemoActivity extends AppCompatActivity
             @Override
             public void onMyLocationChange(Location location) {
                 List<Address> addresses = null;
-                loc = new LatLng(location.getLatitude(),location.getLongitude());
+                if(!isUpdate){
+                    loc = new LatLng(location.getLatitude(),location.getLongitude());
+                }
+
                 if (markerCount == 0) {
                     try{
-                        addresses = geocode.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+                        addresses = geocode.getFromLocation(loc.latitude, loc.longitude,1);
                     }catch (IOException e){
                         System.out.println(e);
                     }

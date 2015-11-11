@@ -226,13 +226,13 @@ public class DBHelper extends SQLiteOpenHelper
         return result;
     }
 
-    public boolean modifyAlarm(String name, Alarm alarm) {
+    public boolean modifyAlarm(Alarm alarm) {
 
         boolean result = false;
 
         ContentValues values = new ContentValues();
 
-        values.put(COlUMN_ID, alarm.getId());
+        //values.put(COlUMN_ID, alarm.getId());
         values.put(COLUMN_GROUP_ID, alarm.getGroupId());
         values.put(COLUMN_MODIF_DATE, alarm.getModificationDate());
         values.put(COLUMN_TITLE, alarm.getTitle());
