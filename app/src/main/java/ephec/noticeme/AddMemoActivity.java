@@ -103,11 +103,11 @@ public class AddMemoActivity extends AppCompatActivity
 
         final ScrollView mainSW = (ScrollView) this.findViewById(R.id.scrollView);
         ImageView transparentImg = (ImageView) this.findViewById(R.id.transparent_image);
-        transparentImg.setOnTouchListener(new View.OnTouchListener(){
+        transparentImg.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View v,MotionEvent event)  {
-               int action = event.getAction();
-                switch (action){
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
                     case MotionEvent.ACTION_DOWN:
                         mainSW.requestDisallowInterceptTouchEvent(true);
                         return false;
@@ -225,6 +225,7 @@ public class AddMemoActivity extends AppCompatActivity
 
                 if (markerCount == 0) {
                     try{
+                        geocode = new Geocoder(getApplicationContext(), Locale.getDefault());
                         addresses = geocode.getFromLocation(loc.latitude, loc.longitude,1);
                     }catch (IOException e){
                         System.out.println(e);

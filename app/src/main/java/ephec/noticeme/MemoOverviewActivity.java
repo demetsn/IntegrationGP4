@@ -6,12 +6,15 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,7 +39,16 @@ public class MemoOverviewActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if(extras != null){
+
+            Toast.makeText(getApplicationContext(), extras.getString("memoTitle"), Toast.LENGTH_SHORT).show();
             Stitle = extras.getString("memoTitle");
+
+            //getSupportActionBar().setTitle("Memo Detail");
+            DBHelper db = new DBHelper(this);
+            db.getReadableDatabase();
+            memo = db.getAlarm(Stitle);
+
+            db.close();
         }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -49,36 +61,32 @@ public class MemoOverviewActivity extends AppCompatActivity {
             }
         });
 
-        //getSupportActionBar().setTitle("Memo Detail");
-        DBHelper db = new DBHelper(this);
-        db.getReadableDatabase();
+        if (memo != null) {
+            title = (TextView) this.findViewById(R.id.memo_overview_title);
+            title.setText(memo.getTitle());
 
-        memo = db.getAlarm(Stitle);
-        db.close();
+            description = (TextView) this.findViewById(R.id.memo_overview_description);
+            description.setText(memo.getDescription());
 
-        title = (TextView) this.findViewById(R.id.memo_overview_title);
-        title.setText(memo.getTitle());
+            date = (TextView) this.findViewById(R.id.memo_overview_date);
+            if(!memo.getAlarmDate().equals("&")){
+                String temp = memo.getAlarmDate().replace('&',' ');
+                date.setText(temp);
+            }
 
-        description = (TextView) this.findViewById(R.id.memo_overview_description);
-        description.setText(memo.getDescription());
+            location = (TextView) this.findViewById(R.id.memo_overview_location);
+            Geocoder geocode = new Geocoder(this, Locale.getDefault());
+            List<Address> addresses = null;
+            try{
+                addresses = geocode.getFromLocation(memo.getLatitude(), memo.getLongitude(),1);
+            }catch(IOException e){
 
-        date = (TextView) this.findViewById(R.id.memo_overview_date);
-        if(!memo.getAlarmDate().equals("&")){
-            String temp = memo.getAlarmDate().replace('&',' ');
-            date.setText(temp);
+            }
+            location.setText(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality());
+
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        location = (TextView) this.findViewById(R.id.memo_overview_location);
-        Geocoder geocode = new Geocoder(this, Locale.getDefault());
-        List<Address> addresses = null;
-        try{
-            addresses = geocode.getFromLocation(memo.getLatitude(), memo.getLongitude(),1);
-        }catch(IOException e){
-
-        }
-        location.setText(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality());
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -86,6 +94,12 @@ public class MemoOverviewActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.overview_menu, menu);
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent back = new Intent(this, MainActivity.class);
+        startActivity(back);
     }
 
     @Override
