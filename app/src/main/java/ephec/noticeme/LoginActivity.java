@@ -342,12 +342,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
                 String hashed = hexString.toString();
                 */
+                System.out.println(hashed);
 
-
-                /*URL url= new URL("http://superpie.ddns.net:8035/NoticeMe/web/app_dev.php/android/login");
+                URL url= new URL("http://superpie.ddns.net:8035/NoticeMe/web/app_dev.php/android/login");
+                System.out.println("apres");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(15000);
+                System.out.println("apres2");
+                conn.setReadTimeout(100000);
+                conn.setConnectTimeout(150000);
                 conn.setRequestMethod("POST");
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
@@ -370,14 +372,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 bufferedReader.close();
                 inputStream.close();
                 conn.disconnect();
-                */
+
 
             }catch (Exception e){
                 System.out.println("Une exeption s'est produite : "+e);
                 return false;
             }
 
-            /*if(response.equals("1")){
+            if(response.equals("1")){
                 String filename = "user.save";
                 File file = new File(LoginActivity.this.getApplicationContext().getFilesDir(), filename);
                 FileOutputStream outputStream;
@@ -392,13 +394,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
                 return true;
             }else if(response.equals("0")){
-                return true;
-                //TODO METTRE EN FALSE
-                //return false;
-            }*/
-            return true;
-            //TODO METTRE EN FALSE
-            //return false;
+                System.out.println("Error Loggin");
+                return false;
+            }
+            return false;
         }
 
         @Override

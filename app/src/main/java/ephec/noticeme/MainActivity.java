@@ -39,8 +39,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 
-//TODO EMPECHER LE ROTATE
-//TODO BUG AVEC ONBACKONPRESSED
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -49,10 +48,8 @@ public class MainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private BroadcastReceiver br;
     private float radius = 50f;
-    //private static ArrayList<Alarm> LAlarm = new ArrayList();
-    private static int mNotificationId = 0;
-    NotificationCompat.Builder builder;
-    private NotificationManager mNotificationManager;
+    private static ArrayList<Alarm> LAlarm ;
+    private static ArrayList<Alarm> AlarmToRestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +58,7 @@ public class MainActivity extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Memo List");
-
+        LAlarm = new ArrayList<>();
 
         Bundle extras = getIntent().getExtras();
         if(extras != null){
@@ -71,7 +68,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         TextView userTxtView = (TextView)findViewById(R.id.username);
-        /*File file = new File(this.getFilesDir(), "user.save");
+        File file = new File(this.getFilesDir(), "user.save");
         String line;
         try{
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -84,7 +81,7 @@ public class MainActivity extends AppCompatActivity
             return;
         }
         //separation du email et du mdp venant du fichier
-        userTxtView.setText(line.split("£")[0]);*/
+        userTxtView.setText(line.split("£")[0]);
 
         fragmentManager = getSupportFragmentManager();
         // Check that the activity is using the layout version with
@@ -138,7 +135,7 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            //super.onBackPressed();
         }
     }
 
@@ -175,47 +172,66 @@ public class MainActivity extends AppCompatActivity
                     "refresh the list with the server",
                     Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            Fragment newFragment = new MemoList();
+            toolbar.setTitle("Memo List");
+            itemMenu.setVisible(true);
+            transaction.replace(R.id.fragment_container, newFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
             return true;
         }
         if(id == R.id.action_delete){
-            //DBHelper db = new DBHelper(this.getApplicationContext());
-            //db.getReadableDatabase();
+            DBHelper db = new DBHelper(this.getApplicationContext());
+            db.getReadableDatabase();
+            AlarmToRestore = new ArrayList<>();
 
-            /*Iterator<Alarm> it = LAlarm.iterator();
+            Iterator<Alarm> it = LAlarm.iterator();
             while(it.hasNext()){
                 Alarm temp = it.next();
-                System.out.println(temp.getTitle());
+                AlarmToRestore.add(temp);
                 db.deleteAlarm(temp.getTitle());
                 //MemoList.hideAlarm(temp);
             }
             db.close();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            Fragment newFragment = new MemoList();
+            toolbar.setTitle("Memo List");
+            itemMenu.setVisible(true);
+            transaction.replace(R.id.fragment_container, newFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+            if(!AlarmToRestore.isEmpty()){
+                Snackbar.make(
+                        findViewById(android.R.id.content),
+                        "Selected item deleted",
+                        Snackbar.LENGTH_LONG)
+                        .setAction("Undo", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                DBHelper db = new DBHelper(v.getContext());
+                                db.getReadableDatabase();
+                                Iterator<Alarm> iterator = AlarmToRestore.iterator();
+                                while(iterator.hasNext()){
+                                    Alarm temp = iterator.next();
+                                    db.addAlarm(temp);
+                                }
+                                db.close();
+                                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                                Fragment newFragment = new MemoList();
+                                transaction.replace(R.id.fragment_container, newFragment);
+                                transaction.addToBackStack(null);
+                                transaction.commit();
 
-            Snackbar.make(
-                    findViewById(android.R.id.content),
-                    "Selected item deleted",
-                    Snackbar.LENGTH_LONG)
-                    .setAction("Undo", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            DBHelper db = new DBHelper(v.getContext());
-                            db.getReadableDatabase();
-                            Iterator<Alarm> iterator = LAlarm.iterator();
-                            while(iterator.hasNext()){
-                                Alarm temp = iterator.next();
-                                db.addAlarm(temp);
-                                //MemoList.showAlarm(temp);
                             }
-                            db.close();
-                        }
-                    }).show();*/
-
+                        }).show();
+            }
             return true;
         }
         if(id == R.id.action_deco){
             String filename = "user.save";
             File file = new File(this.getFilesDir(), filename);
             Boolean del = file.delete();
-            System.out.println(del);
             if(del){
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
@@ -279,24 +295,24 @@ public class MainActivity extends AppCompatActivity
 
         Alarm memo = db.getAlarm(title);
         db.close();
-        if(memo.getAlarmDate().equals("&")){
-
-        }else{
+        if(!memo.getAlarmDate().equals("&")){
             setTimedAlert(memo);
         }
-        setProximityAlert(memo);
+        //setProximityAlert(memo);
     }
 
     @SuppressLint("NewApi")
     private void setTimedAlert(Alarm memo) {
-        Intent intent = new Intent("ephec.noticeme");
-        intent.putExtra("memoTitle", memo.getTitle());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        //Intent intent = new Intent("ephec.noticeme");
+        Intent intentAlarm = new Intent(this,AlarmReceiver.class);
+        intentAlarm.putExtra("memoTitle", memo.getTitle());
+        intentAlarm.putExtra("desc","Location notification");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intentAlarm, 0);
 
-        AlarmManager manager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        manager.setExact(AlarmManager.RTC, getTime(memo), pendingIntent);
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        manager.setExact(AlarmManager.RTC_WAKEUP, getTime(memo), pendingIntent);
 
-        setup();
+        //setup();
     }
 
     public long getTime(Alarm memo) {
@@ -329,28 +345,28 @@ public class MainActivity extends AppCompatActivity
 
         Intent intent = new Intent("ephec.noticeme");
         intent.putExtra("memoTitle", memo.getTitle());
+        intent.putExtra("desc","Location notification");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
-
-        setup();
+        //setup();
     }
 
     // Prépare the alarm.
-    public void setup() {
+    /*public void setup() {
 
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context c, Intent i) {
 
-                launchNotification(i.getExtras().getString("memoTitle"),"La description a lancer et faut recuperer");
+                launchNotification(i.getExtras().getString("memoTitle"),i.getExtras().getString("desc"));
                 c.unregisterReceiver(br);
             }
         };
         registerReceiver(br, new IntentFilter("ephec.noticeme"));
-    }
+    }*/
 
-    public void launchNotification(String title,String description){
+    /*public void launchNotification(String title,String description){
         mNotificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
 
@@ -370,17 +386,11 @@ public class MainActivity extends AppCompatActivity
         builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("NoticeMe notification")
-                        .setContentText(title)
+                        .setContentTitle(title)
+                        .setContentText(description)
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
-                /*
-                 * Sets the big view "big text" style and supplies the
-                 * text (the user's reminder message) that will be displayed
-                 * in the detail area of the expanded notification.
-                 * These calls are ignored by the support library for
-                 * pre-4.1 devices.
-                 */
+
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(description))
                         .addAction (R.drawable.ic_action_cancel,
@@ -388,11 +398,7 @@ public class MainActivity extends AppCompatActivity
                         .addAction (R.drawable.ic_action_plus,
                                 "Snooze", piSnooze);
 
-        /*
-         * Clicking the notification itself displays ResultActivity, which provides
-         * UI for snoozing or dismissing the notification.
-         * This is available through either the normal view or big view.
-         */
+
         Intent resultIntent = new Intent(this, MemoOverviewActivity.class);
         resultIntent.putExtra("memoTitle", title);
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -411,12 +417,16 @@ public class MainActivity extends AppCompatActivity
         mNotificationId++;
         mNotificationManager.notify(mNotificationId, builder.build());
 
-    }
+    }*/
 
-    /*public static void addAlarm(Alarm alarm){
+    public static void addAlarm(Alarm alarm){
         LAlarm.add(alarm);
     }
     public static void removeAlarm(Alarm alarm){
         LAlarm.remove(alarm);
-    }*/
+    }
+    public static void clearList(){
+        LAlarm = new ArrayList<>();
+    }
+
 }

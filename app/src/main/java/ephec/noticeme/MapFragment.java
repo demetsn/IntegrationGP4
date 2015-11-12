@@ -34,7 +34,7 @@ public class MapFragment extends Fragment {
 
     MapView mMapView;
     private GoogleMap mMap;
-    private Geocoder geocode;
+    //private Geocoder geocode;
     public static int markerCount = 0;
 
 
@@ -58,7 +58,7 @@ public class MapFragment extends Fragment {
         }
 
         mMap = mMapView.getMap();
-        geocode = new Geocoder(getActivity(), Locale.getDefault());
+        //geocode = new Geocoder(getActivity(), Locale.getDefault());
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
             @Override
