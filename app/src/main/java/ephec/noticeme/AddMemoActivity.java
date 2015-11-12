@@ -40,6 +40,7 @@ import java.util.Locale;
 import java.util.Random;
 
 //TODO BUG SI AJOUT JUSTE DE DATE OU JUSTE TIME
+//TODO AMELIORER L INTERFACE AVEC AJOUT DE LA DATE FACULTATIVE VIA UN LISTENER SUR TEXTVIEW
 public class AddMemoActivity extends AppCompatActivity
         implements
         View.OnClickListener,
@@ -126,7 +127,7 @@ public class AddMemoActivity extends AppCompatActivity
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_frag);
         mapFragment.getMapAsync(this);
 
-        geocode = new Geocoder(this, Locale.getDefault());
+
     }
 
     @Override

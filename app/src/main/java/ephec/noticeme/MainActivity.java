@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         TextView userTxtView = (TextView)findViewById(R.id.username);
-        /*File file = new File(this.getFilesDir(), "user.save");
+        File file = new File(this.getFilesDir(), "user.save");
         String line;
         try{
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity
             return;
         }
         //separation du email et du mdp venant du fichier
-        userTxtView.setText(line.split("£")[0]);*/
+        userTxtView.setText(line.split("£")[0]);
 
         fragmentManager = getSupportFragmentManager();
         // Check that the activity is using the layout version with

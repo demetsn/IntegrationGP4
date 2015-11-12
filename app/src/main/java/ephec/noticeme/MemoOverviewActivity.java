@@ -1,6 +1,8 @@
 package ephec.noticeme;
 
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,11 +13,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 public class MemoOverviewActivity extends AppCompatActivity {
 
     Alarm memo;
     TextView title;
     TextView description;
+    TextView date;
+    TextView location;
     String Stitle;
 
     @Override
@@ -26,21 +35,21 @@ public class MemoOverviewActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         Bundle extras = getIntent().getExtras();
-        Stitle = extras.getString("memoTitle");
+        if(extras != null){
+            Stitle = extras.getString("memoTitle");
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                //TODO CHECK IN ADDMEMO FOR AN EDIT OR A NEW MEMO
                 Intent intent = new Intent(view.getContext(), AddMemoActivity.class);
                 intent.putExtra("memoTitle",Stitle);
                 startActivity(intent);
             }
         });
 
-        getSupportActionBar().setTitle(Stitle);
+        //getSupportActionBar().setTitle("Memo Detail");
         DBHelper db = new DBHelper(this);
         db.getReadableDatabase();
 
@@ -52,6 +61,22 @@ public class MemoOverviewActivity extends AppCompatActivity {
 
         description = (TextView) this.findViewById(R.id.memo_overview_description);
         description.setText(memo.getDescription());
+
+        date = (TextView) this.findViewById(R.id.memo_overview_date);
+        if(!memo.getAlarmDate().equals("&")){
+            String temp = memo.getAlarmDate().replace('&',' ');
+            date.setText(temp);
+        }
+
+        location = (TextView) this.findViewById(R.id.memo_overview_location);
+        Geocoder geocode = new Geocoder(this, Locale.getDefault());
+        List<Address> addresses = null;
+        try{
+            addresses = geocode.getFromLocation(memo.getLatitude(), memo.getLongitude(),1);
+        }catch(IOException e){
+
+        }
+        location.setText(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality());
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
