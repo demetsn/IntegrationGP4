@@ -53,12 +53,12 @@ public class MainActivity extends AppCompatActivity
     public static FragmentManager fragmentManager;
     private MenuItem itemMenu;
     private Toolbar toolbar;
-    private BroadcastReceiver br;
     private float radius = 25f;
     //private static ArrayList<Alarm> LAlarm = new ArrayList();
     private static int mNotificationId = 0;
     NotificationCompat.Builder builder;
     private NotificationManager mNotificationManager;
+    BroadcastReceiver br;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -333,10 +333,10 @@ public class MainActivity extends AppCompatActivity
     private void setProximityAlert(Alarm memo) {
         LocationManager locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        /*LocationListener locListener = new LocationListener() {
+        final LocationListener locListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-
+                Toast.makeText(getBaseContext(),"Position changed Latitude : "+location.getLatitude()+" Longitude : "+location.getLongitude(),Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -362,17 +362,10 @@ public class MainActivity extends AppCompatActivity
                 locListener
         );
 
-        locManager.requestLocationUpdates(
-                LocationManager.NETWORK_PROVIDER,
-                1000,
-                MINIMUM_DISTANCECHANGE_FOR_UPDATE,
-                locListener
-        );*/
-
 
         Intent intent = new Intent("ephec.noticceme"+memo.getTitle());
         intent.putExtra("memoTitle", memo.getTitle());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
 
@@ -382,6 +375,7 @@ public class MainActivity extends AppCompatActivity
     // Prépare the alarm.
     public void geoSetup(String title) {
 
+        IntentFilter filter =  new IntentFilter("ephec.noticceme"+title);
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context c, Intent i) {
@@ -391,7 +385,7 @@ public class MainActivity extends AppCompatActivity
                 c.unregisterReceiver(br);
             }
         };
-        registerReceiver(br, new IntentFilter("ephec.noticceme"+title));
+        registerReceiver(br,filter);
     }
 
 
