@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity
     private float radius = 50f;
     private static ArrayList<Alarm> LAlarm ;
     private static ArrayList<Alarm> AlarmToRestore;
+    private static int mNotificationId = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -395,7 +396,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onReceive(Context c, Intent i) {
 
-                launchNotification(i.getExtras().getString("memoTitle"),"La description a lancer et faut recuperer");
+                launchNotification(i.getExtras().getString("memoTitle"), "La description a lancer et faut recuperer");
                 c.unregisterReceiver(br);
             }
         };
@@ -403,7 +404,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void launchNotification(String title,String description){
-        mNotificationManager = (NotificationManager)
+        NotificationManager mNotificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
 
         // Sets up the Snooze and Dismiss action buttons that will appear in the
@@ -419,20 +420,14 @@ public class MainActivity extends AppCompatActivity
         PendingIntent piSnooze = PendingIntent.getService(this, 0, snoozeIntent, 0);
 
         // Constructs the Builder object.
-        builder =
+        NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("NoticeMe notification")
                         .setContentText(title)
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
-                /*
-                 * Sets the big view "big text" style and supplies the
-                 * text (the user's reminder message) that will be displayed
-                 * in the detail area of the expanded notification.
-                 * These calls are ignored by the support library for
-                 * pre-4.1 devices.
-                 */
+
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(description))
                         .addAction (R.drawable.ic_action_cancel,
@@ -440,11 +435,7 @@ public class MainActivity extends AppCompatActivity
                         .addAction (R.drawable.ic_action_plus,
                                 "Snooze", piSnooze);
 
-        /*
-         * Clicking the notification itself displays ResultActivity, which provides
-         * UI for snoozing or dismissing the notification.
-         * This is available through either the normal view or big view.
-         */
+
         Intent resultIntent = new Intent(this, MemoOverviewActivity.class);
         resultIntent.putExtra("memoTitle", title);
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
