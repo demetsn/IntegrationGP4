@@ -5,11 +5,14 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -30,6 +33,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -43,6 +47,8 @@ import java.util.Iterator;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 5000 ;//en millisecondes
+    private static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 1;
     public static FragmentManager fragmentManager;
     private MenuItem itemMenu;
     private Toolbar toolbar;
@@ -298,7 +304,7 @@ public class MainActivity extends AppCompatActivity
         if(!memo.getAlarmDate().equals("&")){
             setTimedAlert(memo);
         }
-        //setProximityAlert(memo);
+        setProximityAlert(memo);
     }
 
     @SuppressLint("NewApi")
@@ -343,30 +349,60 @@ public class MainActivity extends AppCompatActivity
     private void setProximityAlert(Alarm memo) {
         LocationManager locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        Intent intent = new Intent("ephec.noticeme");
+        final LocationListener locListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        locManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                MINIMUM_TIME_BETWEEN_UPDATE,
+                MINIMUM_DISTANCECHANGE_FOR_UPDATE,
+                locListener
+        );
+
+
+        Intent intent = new Intent("ephec.noticceme"+memo.getTitle());
         intent.putExtra("memoTitle", memo.getTitle());
-        intent.putExtra("desc","Location notification");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
-        //setup();
+
+        geoSetup(memo.getTitle());
     }
 
     // Prépare the alarm.
-    /*public void setup() {
+    public void geoSetup(String title) {
 
+        IntentFilter filter =  new IntentFilter("ephec.noticceme"+title);
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context c, Intent i) {
 
-                launchNotification(i.getExtras().getString("memoTitle"),i.getExtras().getString("desc"));
+                launchNotification(i.getExtras().getString("memoTitle"),"La description a lancer et faut recuperer");
                 c.unregisterReceiver(br);
             }
         };
         registerReceiver(br, new IntentFilter("ephec.noticeme"));
-    }*/
+    }
 
-    /*public void launchNotification(String title,String description){
+    public void launchNotification(String title,String description){
         mNotificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
 
@@ -386,11 +422,17 @@ public class MainActivity extends AppCompatActivity
         builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle(title)
-                        .setContentText(description)
+                        .setContentTitle("NoticeMe notification")
+                        .setContentText(title)
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
-
+                /*
+                 * Sets the big view "big text" style and supplies the
+                 * text (the user's reminder message) that will be displayed
+                 * in the detail area of the expanded notification.
+                 * These calls are ignored by the support library for
+                 * pre-4.1 devices.
+                 */
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(description))
                         .addAction (R.drawable.ic_action_cancel,
@@ -398,7 +440,11 @@ public class MainActivity extends AppCompatActivity
                         .addAction (R.drawable.ic_action_plus,
                                 "Snooze", piSnooze);
 
-
+        /*
+         * Clicking the notification itself displays ResultActivity, which provides
+         * UI for snoozing or dismissing the notification.
+         * This is available through either the normal view or big view.
+         */
         Intent resultIntent = new Intent(this, MemoOverviewActivity.class);
         resultIntent.putExtra("memoTitle", title);
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -417,7 +463,7 @@ public class MainActivity extends AppCompatActivity
         mNotificationId++;
         mNotificationManager.notify(mNotificationId, builder.build());
 
-    }*/
+    }
 
     public static void addAlarm(Alarm alarm){
         LAlarm.add(alarm);
