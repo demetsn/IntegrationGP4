@@ -87,9 +87,9 @@ public class DBHelper extends SQLiteOpenHelper
         return result;
     }
 
-    public Alarm getAlarm(String title)
-    {
-        String query = "Select * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_TITLE + " =  \"" + title + "\"";
+    public Alarm getAlarm(int id){
+
+        String query = "Select * FROM " + TABLE_ALARMS + " WHERE " + COlUMN_ID + " =  \"" + id + "\"";
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -117,9 +117,8 @@ public class DBHelper extends SQLiteOpenHelper
         return alarm;
     }
 
-    public Alarm getAlarm(int id){
-
-        String query = "Select * FROM " + TABLE_ALARMS + " WHERE " + COlUMN_ID + " =  \"" + id + "\"";
+    public Alarm getAlarm(String title) {
+        String query = "Select * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_TITLE + " =  \"" + title + "\"";
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -181,6 +180,29 @@ public class DBHelper extends SQLiteOpenHelper
         return alarms;
     }
 
+    public boolean deleteAlarm(int id) {
+
+        boolean result = false;
+
+        String query = "Select * FROM " + TABLE_ALARMS + " WHERE " + COlUMN_ID + " =  \"" + id + "\"";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        Alarm alarm = new Alarm();
+
+        if (cursor.moveToFirst()) {
+            alarm.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_ID))));
+            db.delete(TABLE_ALARMS, COlUMN_ID + " = ?",
+                    new String[]{String.valueOf(alarm.getId())});
+            cursor.close();
+            result = true;
+        }
+        db.close();
+        return result;
+    }
+
     public boolean deleteAlarm(String title) {
 
         boolean result = false;
@@ -204,13 +226,13 @@ public class DBHelper extends SQLiteOpenHelper
         return result;
     }
 
-    public boolean modifyAlarm(String title, Alarm alarm) {
+    public boolean modifyAlarm(Alarm alarm) {
 
         boolean result = false;
 
         ContentValues values = new ContentValues();
 
-        values.put(COlUMN_ID, alarm.getId());
+        //values.put(COlUMN_ID, alarm.getId());
         values.put(COLUMN_GROUP_ID, alarm.getGroupId());
         values.put(COLUMN_MODIF_DATE, alarm.getModificationDate());
         values.put(COLUMN_TITLE, alarm.getTitle());
@@ -221,7 +243,7 @@ public class DBHelper extends SQLiteOpenHelper
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.update(TABLE_ALARMS, values, COLUMN_TITLE + "= '"+ title + "'", null);
+        db.update(TABLE_ALARMS, values, COlUMN_ID + "=" + alarm.getId(), null);
 
         result = true;
         return result;
@@ -296,24 +318,5 @@ public class DBHelper extends SQLiteOpenHelper
         db.close();
 
         return alarms;
-    }
-
-    public boolean alarmExist(String title) {
-        boolean exist = false;
-        String query = "SELECT * FROM " + TABLE_ALARMS + " WHERE " + COLUMN_TITLE + " = \"" + title + "\"";
-
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.rawQuery(query, null);
-        if(cursor.getCount()==0)
-        {
-            exist = false;
-        }
-        else
-        {
-            exist = true;
-        }
-
-        return exist;
     }
 }

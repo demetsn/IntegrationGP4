@@ -26,22 +26,22 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-
 public class MemoList extends Fragment {
 
     private static final int HIGHLIGHT_COLOR = 0x999be6ff;
 
     private ColorGenerator mColorGenerator = ColorGenerator.MATERIAL;
     private TextDrawable.IBuilder mDrawableBuilder;
-    private ArrayList<ListData> mDataList = new ArrayList();
-    //private static SampleAdapter sampleAdapter;
+    private ArrayList<ListData> mDataList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_memo_list, container, false);
+        mDataList = new ArrayList();
         fillMemoList();
+        MainActivity.clearList();
         mDrawableBuilder = TextDrawable.builder()
                 .round();
         ListView listView = (ListView) view.findViewById(R.id.listView);
@@ -102,6 +102,11 @@ public class MemoList extends Fragment {
                     // when the image is clicked, update the selected state
                     ListData data = getItem(position);
                     data.setChecked(!data.isChecked);
+                    if(data.isChecked){
+                        MainActivity.addAlarm(data.alarm);
+                    }else{
+                        MainActivity.removeAlarm(data.alarm);
+                    }
                     updateCheckedState(holder, data);
                 }
             });
@@ -120,6 +125,12 @@ public class MemoList extends Fragment {
                     // when the image is clicked, update the selected state
                     ListData data = getItem(position);
                     data.setChecked(!data.isChecked);
+                    if(data.isChecked){
+                        MainActivity.addAlarm(data.alarm);
+                    }else{
+                        MainActivity.removeAlarm(data.alarm);
+                    }
+
                     updateCheckedState(holder, data);
                     return true;
                 }
@@ -139,13 +150,11 @@ public class MemoList extends Fragment {
 
         private void updateCheckedState(ViewHolder holder, ListData item){
             if (item.isChecked) {
-                //MainActivity.removeAlarm(item.alarm);
                 holder.imageView.setImageDrawable(mDrawableBuilder.build(" ", 0xff616161));
                 holder.view.setBackgroundColor(HIGHLIGHT_COLOR);
                 holder.checkIcon.setVisibility(View.VISIBLE);
             }
             else {
-                //MainActivity.addAlarm(item.alarm);
                 TextDrawable drawable = mDrawableBuilder.build(
                         String.valueOf(item.alarm.getTitle().charAt(0)),
                         mColorGenerator.getColor(item.alarm.getTitle()));
@@ -191,15 +200,5 @@ public class MemoList extends Fragment {
             this.isChecked = isChecked;
         }
     }
-
-    /*public static void hideAlarm(Alarm alarm){
-        ListData temp = new ListData(alarm);
-        mDataList.remove(temp);
-        sampleAdapter.notifyDataSetChanged();
-    }
-    public static void showAlarm(Alarm alarm){
-        mDataList.add(new ListData(alarm));
-        sampleAdapter.notifyDataSetChanged();
-    }*/
 
 }

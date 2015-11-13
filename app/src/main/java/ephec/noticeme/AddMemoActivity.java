@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+//TODO BUG SI AJOUT JUSTE DE DATE OU JUSTE TIME
+//TODO AMELIORER L INTERFACE AVEC AJOUT DE LA DATE FACULTATIVE VIA UN LISTENER SUR TEXTVIEW
 public class AddMemoActivity extends AppCompatActivity
         implements
         View.OnClickListener,
@@ -53,6 +55,8 @@ public class AddMemoActivity extends AppCompatActivity
     private Marker mMarker;
     private Geocoder geocode;
     private static int markerCount;
+    private boolean isUpdate;
+    private int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,14 +74,40 @@ public class AddMemoActivity extends AppCompatActivity
         this.date.setOnClickListener(this);
         this.time = (TextView) this.findViewById(R.id.memo_textTime);
         this.time.setOnClickListener(this);
+        this.isUpdate = false;
+
+        Bundle extras = getIntent().getExtras();
+        String alarmTitle = "";
+        Alarm memo;
+        if(extras != null){
+            this.isUpdate = true;
+            alarmTitle = extras.getString("memoTitle");
+            DBHelper db = new DBHelper(this);
+            db.getReadableDatabase();
+
+            memo = db.getAlarm(alarmTitle);
+            db.close();
+            this.id = memo.getId();
+            this.title.setText(memo.getTitle());
+            this.description.setText(memo.getDescription());
+            if(!memo.getAlarmDate().equals("&")){
+                String temp[] = memo.getAlarmDate().split("&");
+                this.date.setText(temp[0]);
+                this.time.setText(temp[1]);
+            }
+
+            this.loc = new LatLng(memo.getLatitude(),memo.getLongitude());
+        }
+
+
 
         final ScrollView mainSW = (ScrollView) this.findViewById(R.id.scrollView);
         ImageView transparentImg = (ImageView) this.findViewById(R.id.transparent_image);
-        transparentImg.setOnTouchListener(new View.OnTouchListener(){
+        transparentImg.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View v,MotionEvent event)  {
-               int action = event.getAction();
-                switch (action){
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
                     case MotionEvent.ACTION_DOWN:
                         mainSW.requestDisallowInterceptTouchEvent(true);
                         return false;
@@ -97,7 +127,7 @@ public class AddMemoActivity extends AppCompatActivity
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_frag);
         mapFragment.getMapAsync(this);
 
-        geocode = new Geocoder(this, Locale.getDefault());
+
     }
 
     @Override
@@ -129,19 +159,31 @@ public class AddMemoActivity extends AppCompatActivity
                 memo.setLatitude(mMarker.getPosition().latitude);
                 memo.setLongitude(mMarker.getPosition().longitude);
 
-                Random rn1 = new Random();
-                memo.setId(rn1.nextInt(10000));
+                if(!isUpdate){
+                    Random rn1 = new Random();
+                    memo.setId(rn1.nextInt(10000));
+                }else{
+                    memo.setId(this.id);
+                }
                 memo.setGroupId(0);
 
                 DBHelper db = new DBHelper(this);
-
-                if(db.addAlarm(memo))
-                {
-                    //launchNotification();
+                if(isUpdate){
+                    db.modifyAlarm(memo);
                     Intent save = new Intent(this, MainActivity.class);
                     save.putExtra("Title",memo.getTitle());
                     startActivity(save);
+
+                }else{
+                    if(db.addAlarm(memo))
+                    {
+                        //launchNotification();
+                        Intent save = new Intent(this, MainActivity.class);
+                        save.putExtra("Title",memo.getTitle());
+                        startActivity(save);
+                    }
                 }
+
 
                 return true;
             case R.id.action_cancel:
@@ -177,20 +219,28 @@ public class AddMemoActivity extends AppCompatActivity
             @Override
             public void onMyLocationChange(Location location) {
                 List<Address> addresses = null;
-                loc = new LatLng(location.getLatitude(),location.getLongitude());
+                if(!isUpdate){
+                    loc = new LatLng(location.getLatitude(),location.getLongitude());
+                }
+
                 if (markerCount == 0) {
                     try{
-                        addresses = geocode.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+                        geocode = new Geocoder(getApplicationContext(), Locale.getDefault());
+                        addresses = geocode.getFromLocation(loc.latitude, loc.longitude,1);
                     }catch (IOException e){
-
+                        System.out.println(e);
                     }
-                    mMarker = mMap.addMarker(new MarkerOptions()
-                        .position(loc)
-                        .title("Tap the screen to update location")
-                        .snippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality())
-                        .draggable(true)
-                    );
-                    mMarker.showInfoWindow();
+                    try{
+                        mMarker = mMap.addMarker(new MarkerOptions()
+                                        .position(loc)
+                                        .title("Tap the screen to update location")
+                                        .snippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality())
+                                        .draggable(true)
+                        );
+                        mMarker.showInfoWindow();
+                    }catch (NullPointerException e){
+                        System.out.println(e);
+                    }
                     mMap.animateCamera((CameraUpdateFactory.newLatLngZoom(loc, 13)));
                     markerCount = 1;
                 }
@@ -203,12 +253,15 @@ public class AddMemoActivity extends AppCompatActivity
                 List<Address> addresses = null;
                 try{
                     addresses = geocode.getFromLocation(latLng.latitude, latLng.longitude,1);
+                    mMarker.setPosition(latLng);
+                    mMarker.setSnippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality());
+                    mMarker.showInfoWindow();
                 }catch (IOException e){
 
+                }catch (NullPointerException e){
+
                 }
-                mMarker.setPosition(latLng);
-                mMarker.setSnippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality());
-                mMarker.showInfoWindow();
+
             }
         });
 
