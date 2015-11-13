@@ -47,13 +47,13 @@ import java.util.Iterator;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 5000 ;//en millisecondes
-    private static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 1;
+    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 120000 ;//en millisecondes
+    private static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 100;
     public static FragmentManager fragmentManager;
     private MenuItem itemMenu;
     private Toolbar toolbar;
     private BroadcastReceiver br;
-    private float radius = 50f;
+    private float radius = 100f;
     private static ArrayList<Alarm> LAlarm ;
     private static ArrayList<Alarm> AlarmToRestore;
     private static int mNotificationId = 0;
@@ -310,16 +310,12 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressLint("NewApi")
     private void setTimedAlert(Alarm memo) {
-        //Intent intent = new Intent("ephec.noticeme");
         Intent intentAlarm = new Intent(this,AlarmReceiver.class);
         intentAlarm.putExtra("memoTitle", memo.getTitle());
-        intentAlarm.putExtra("desc","Location notification");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intentAlarm, 0);
 
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         manager.setExact(AlarmManager.RTC_WAKEUP, getTime(memo), pendingIntent);
-
-        //setup();
     }
 
     public long getTime(Alarm memo) {
@@ -401,6 +397,11 @@ public class MainActivity extends AppCompatActivity
             }
         };
         registerReceiver(br, new IntentFilter("ephec.noticeme"));
+
+        //Intent intentAlarm = new Intent(this,AlarmReceiver.class);
+        //intentAlarm.putExtra("memoTitle", title);
+        //PendingIntent pendingIntent = PendingIntent.getBroadcast(this, title.charAt(0), intentAlarm, 0);
+        //registerReceiver(new AlarmReceiver(),intentAlarm);
     }
 
     public void launchNotification(String title,String description){

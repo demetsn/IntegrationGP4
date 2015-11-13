@@ -14,13 +14,13 @@ https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend
     -->
 
     <!-- Nico -->
-    <!--
+
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
         AIzaSyDa4FgtlboMG3KB8MUf7H1_0LnoU8ADok8
-    </string>-->
+    </string>
 
-
+    <!--
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
         AIzaSyCRHD8ccFhF1kmDlfy7fERmNy23eks0qh0
-    </string>
+    </string>-->
 </resources>
