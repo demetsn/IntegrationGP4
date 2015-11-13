@@ -6,6 +6,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 //import android.app.Fragment;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -85,6 +86,14 @@ public class MapFragment extends Fragment {
                             .title(temp.getTitle())
                             .snippet(temp.getDescription())
             );
+            mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                @Override
+                public void onInfoWindowClick(Marker marker) {
+                    Snackbar.make(getView(), "Click to see the memo detail", Snackbar.LENGTH_LONG)
+                          .setAction("Action", null).show();
+
+                }
+            });
         }
 
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
