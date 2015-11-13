@@ -40,7 +40,6 @@ public class MemoOverviewActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if(extras != null){
 
-            Toast.makeText(getApplicationContext(), extras.getString("memoTitle"), Toast.LENGTH_SHORT).show();
             Stitle = extras.getString("memoTitle");
 
             //getSupportActionBar().setTitle("Memo Detail");
