@@ -336,7 +336,6 @@ public class MainActivity extends AppCompatActivity
         final LocationListener locListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                Toast.makeText(getBaseContext(),"Position changed Latitude : "+location.getLatitude()+" Longitude : "+location.getLongitude(),Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -381,7 +380,7 @@ public class MainActivity extends AppCompatActivity
             public void onReceive(Context c, Intent i) {
 
                 launchNotification(i.getExtras().getString("memoTitle"), "La description a lancer et faut recuperer");
-                removeProximityAlert(i.getExtras().getString("memoTitle"));
+                //removeProximityAlert(i.getExtras().getString("memoTitle"));
                 c.unregisterReceiver(br);
             }
         };
@@ -389,7 +388,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private void removeProximityAlert(String title) {
+    /*private void removeProximityAlert(String title) {
 
         String context = Context.LOCATION_SERVICE;
         LocationManager locationManager = (LocationManager) getSystemService(context);
@@ -404,7 +403,7 @@ public class MainActivity extends AppCompatActivity
         PendingIntent operation =
                 PendingIntent.getBroadcast(getApplicationContext(), memo.getId() , anIntent, 0);
         locationManager.removeProximityAlert(operation);
-    }
+    }*/
 
 
     public void timedSetup() {
