@@ -47,13 +47,13 @@ import java.util.Iterator;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 5000 ;//en millisecondes
-    private static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 1;
+    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 60000 ;//en millisecondes
+    private static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 10;
     public static FragmentManager fragmentManager;
     private MenuItem itemMenu;
     private Toolbar toolbar;
     private BroadcastReceiver br;
-    private float radius = 50f;
+    private float radius = 100f;
     private static ArrayList<Alarm> LAlarm ;
     private static ArrayList<Alarm> AlarmToRestore;
     private static int mNotificationId = 0;
