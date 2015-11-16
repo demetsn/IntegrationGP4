@@ -344,7 +344,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 */
                 System.out.println(hashed);
 
-                URL url= new URL("http://superpie.ddns.net:8035/NoticeMe/web/app_dev.php/android/login");
+                URL url= new URL("http://superpie.ddns.net:8035/app.php/android/login");
                 System.out.println("apres");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 System.out.println("apres2");
