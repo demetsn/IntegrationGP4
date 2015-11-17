@@ -297,7 +297,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String response;
+            /*String response;
             try {
                 //OLD HASHED PASS
                 MessageDigest digest = MessageDigest.getInstance("SHA-512");
@@ -342,7 +342,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
                 String hashed = hexString.toString();
                 */
-                System.out.println(hashed);
+                /*System.out.println(hashed);
 
                 URL url= new URL("http://superpie.ddns.net:8035/app.php/android/login");
                 System.out.println("apres");
@@ -397,7 +397,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 System.out.println("Error Loggin");
                 return false;
             }
-            return false;
+            return false;*/
+            return true;
         }
 
         @Override

@@ -25,6 +25,7 @@ public class AlarmService extends IntentService {
             DBHelper db = new DBHelper(this);
             db.getReadableDatabase();
             Alarm memo = db.getAlarm(extras.getString("memoTitle"));
+            System.out.println(extras.getString("memoTitle"));
             db.close();
             launchNotification(memo);
         }
