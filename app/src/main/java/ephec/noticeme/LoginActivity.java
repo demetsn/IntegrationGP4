@@ -1,5 +1,20 @@
 package ephec.noticeme;
 
+
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Arrays;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -30,7 +45,9 @@ import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -44,10 +61,15 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 import java.security.*;
+
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 
 /**
@@ -299,8 +321,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected Boolean doInBackground(Void... params) {
             String response;
             try {
-                //OLD HASHED PASS
-                MessageDigest digest = MessageDigest.getInstance("SHA-512");
+                //----------------------------------------------------------------------------------
+                //                  OLD HASHED METHOD
+                //----------------------------------------------------------------------------------
+                /*MessageDigest digest = MessageDigest.getInstance("SHA-512");
                 byte[] hash = digest.digest(mPassword.getBytes("UTF-8"));
                 StringBuffer hexString = new StringBuffer();
                 for (int i = 0; i < hash.length; i++) {
@@ -308,53 +332,56 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     if(hex.length() == 1) hexString.append('0');
                     hexString.append(hex);
                 }
-                String hashed = hexString.toString();
+                String hashed = hexString.toString();*/
+                //----------------------------------------------------------------------------------
+                //                  END OLD HASHED METHOD
+                //----------------------------------------------------------------------------------
 
-
-                //generation de cle
-                /*KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-                keyGen.initialize(512);
-                byte[] publicKey = keyGen.genKeyPair().getPublic().getEncoded();
-                byte[] privateKey = keyGen.genKeyPair().getPrivate().getEncoded();
-                */
                 //openssl rsa -pubin -in pubkey.pem -modulus -noout
-                //BigInteger modulus = new BigInteger("the result of pem file", 16);
                 //openssl rsa -pubin -in pubkey.pem -text -noout
-                //BigInteger pubExp = new BigInteger("the result of pem file", 16);
-                /*
+                /*BigInteger modulus = new BigInteger("D927FD65F4F1218349B0A198401997CFF12E27AE0EF02666C91603BF2BAE7E5EBC9191927AEC909C0A10BD925289E5451C758FF32CC38F82DAFC38230DC9436712026BE3C789AFAC5AF32214B5110D0A7AF81D4D375C2D18BE6644817171585DCC35B5EEBF1312682B1CDB040974D75F3385DEEB5AED3B12115A5D2E19A7F36F", 16);
+                BigInteger pubExp = new BigInteger("010001", 16);
+
                 KeyFactory keyFactory = KeyFactory.getInstance("RSA");
                 RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(modulus, pubExp);
                 RSAPublicKey key = (RSAPublicKey) keyFactory.generatePublic(pubKeySpec);
-                */
-                /*
+
                 Cipher cipher = Cipher.getInstance("RSA");
                 cipher.init(Cipher.ENCRYPT_MODE, key);
-                */
+
                 //encryption
-                //byte[] cipherData = cipher.doFinal(mPassword.getBytes());
+                byte[] cipherData = cipher.doFinal(mPassword.getBytes());
                 //translation to string
-                /*
                 StringBuffer hexString = new StringBuffer();
                 for (int i = 0; i < cipherData.length; i++) {
                     String hex = Integer.toHexString(0xff & cipherData[i]);
                     if(hex.length() == 1) hexString.append('0');
                     hexString.append(hex);
                 }
-                String hashed = hexString.toString();
-                */
-                System.out.println(hashed);
+                String hashed = hexString.toString();*/
+                //int i = Integer.parseInt(mPassword) ^ 1101101101;
+                String key = "css is awesome !";
 
-                URL url= new URL("http://superpie.ddns.net:8035/app.php/android/login");
-                System.out.println("apres");
+                String hashed="";
+
+                for (int i = 0; i < mPassword.length(); i++){
+                    for (int j = 0; j < key.length() && i < mPassword.length();j++){
+                        hashed += mPassword.charAt(i) ^ key.charAt(j);
+                        i++;
+                    }
+                }
+                System.out.println(hashed);
+                System.out.println(mPassword);
+
+                URL url= new URL("http://superpie.ddns.net:8035/app_dev.php/android/login");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                System.out.println("apres2");
                 conn.setReadTimeout(100000);
                 conn.setConnectTimeout(150000);
                 conn.setRequestMethod("POST");
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
                 Uri.Builder builder = new Uri.Builder().appendQueryParameter("username",mEmail)
-                                                .appendQueryParameter("password",hashed);
+                                                .appendQueryParameter("password",mPassword);
                 String query = builder.build().getEncodedQuery();
                 OutputStream os = conn.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,"UTF-8"));
@@ -372,6 +399,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 bufferedReader.close();
                 inputStream.close();
                 conn.disconnect();
+                System.out.println("la fin de connexion");
 
 
             }catch (Exception e){
@@ -381,6 +409,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             if(response.equals("1")){
                 String filename = "user.save";
+                System.out.println("Connect successfull !");
                 File file = new File(LoginActivity.this.getApplicationContext().getFilesDir(), filename);
                 FileOutputStream outputStream;
                 try {
@@ -397,6 +426,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 System.out.println("Error Loggin");
                 return false;
             }
+            System.out.println("PAS BIEN DU TOUT !!!!!!!!");
             return false;
         }
 
@@ -419,6 +449,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
         }
+
+    }
+    public static String encrypt (String plain) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
+    {
+
+        BigInteger modulus = new BigInteger("D927FD65F4F1218349B0A198401997CFF12E27AE0EF02666C91603BF2BAE7E5EBC9191927AEC909C0A10BD925289E5451C758FF32CC38F82DAFC38230DC9436712026BE3C789AFAC5AF32214B5110D0A7AF81D4D375C2D18BE6644817171585DCC35B5EEBF1312682B1CDB040974D75F3385DEEB5AED3B12115A5D2E19A7F36F", 16);
+        BigInteger pubExp = new BigInteger("010001", 16);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(modulus, pubExp);
+        RSAPublicKey key = null;
+        try{
+            key = (RSAPublicKey) keyFactory.generatePublic(pubKeySpec);
+        }catch(Exception e){
+
+        }
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        byte [] encryptedBytes = cipher.doFinal(plain.getBytes());
+        String encrypted = bytesToString(encryptedBytes);
+        return encrypted;
+
+    }
+    public static  String bytesToString(byte[] b) {
+        byte[] b2 = new byte[b.length + 1];
+        b2[0] = 1;
+        System.arraycopy(b, 0, b2, 1, b.length);
+        return new BigInteger(b2).toString(36);
     }
 }
 
