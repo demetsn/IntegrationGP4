@@ -43,6 +43,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 
+//TODO BUG QUAND ON CHANGE DE USER
+//TODO CLEAR LE FILE + CLEAR LA DB
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {

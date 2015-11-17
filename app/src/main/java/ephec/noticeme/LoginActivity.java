@@ -425,6 +425,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }else if(response.equals("0")){
                 System.out.println("Error Loggin");
                 return false;
+            }else if(response.equals("3")){
+                System.out.println("User added");
+                return true;
             }
             System.out.println("PAS BIEN DU TOUT !!!!!!!!");
             return false;

@@ -1,9 +1,6 @@
-/**
- * Created by Olivier on 29-09-15.
- */
-
 package ephec.noticeme;
 
+//TODO AJOUTER UNE BDD USER
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
