@@ -2,6 +2,7 @@ package ephec.noticeme;
 
 
 import android.net.Uri;
+import android.util.Base64;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,6 +12,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+//import org.apache.commons.codec.binary.Base64;
 
 public class Connector {
     private HttpURLConnection conn;
@@ -39,8 +45,9 @@ public class Connector {
     public String login(String mEmail, String mPassword){
         String response = "";
         try{
+            String crypted = encrypt(mPassword);
             Uri.Builder builder = new Uri.Builder().appendQueryParameter("username",mEmail)
-                    .appendQueryParameter("password",mPassword);
+                    .appendQueryParameter("password",crypted);
             String query = builder.build().getEncodedQuery();
             OutputStream os = conn.getOutputStream();
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,"UTF-8"));
@@ -72,6 +79,55 @@ public class Connector {
             return false;
         }
         return true;
+    }
+    public ArrayList<User> getUser(String mail){
+        //TODO
+        return null;
+    }
+    public boolean setUser(User user){
+        //TODO
+        return false;
+    }
+    public boolean addMemo(Alarm memo){
+        //TODO recuperer l'id du server
+        return false;
+    }
+    public boolean removeMemo(Alarm memo){
+        //TODO
+        return false;
+    }
+    public ArrayList<Alarm> getMemo(){
+        //TODO
+        return null;
+    }
+
+    public static String encrypt(String input){
+        String key = "IAmKey!";
+        byte[] crypted = null;
+        try{
+            SecretKeySpec skey = new SecretKeySpec(key.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, skey);
+            crypted = cipher.doFinal(input.getBytes());
+        }catch(Exception e){
+            System.out.println(e.toString());
+        }
+        //return Base64.encodeToString(crypted,Base64.DEFAULT);
+        //TODO mettre le bon return
+        return input;
+    }
+    public static String decrypt(String input){
+        String key = "IAmKey!";
+        byte[] output = null;
+        try{
+            SecretKeySpec skey = new SecretKeySpec(key.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, skey);
+            output = cipher.doFinal(Base64.decode(input,Base64.DEFAULT));
+        }catch(Exception e){
+            System.out.println(e.toString());
+        }
+        return new String(output);
     }
 
     //try {
