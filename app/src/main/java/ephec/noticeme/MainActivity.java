@@ -77,20 +77,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         TextView userTxtView = (TextView)findViewById(R.id.username);
-        /*File file = new File(this.getFilesDir(), "user.save");
-        String line;
-        try{
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            line = br.readLine();
-            br.close();
-        }catch(FileNotFoundException e){
-            return;
-        }
-        catch(Exception e){
-            return;
-        }
-        //separation du email et du mdp venant du fichier
-        userTxtView.setText(line.split("£")[0]);*/
         //TODO GET LE USER DANS DB AVEC TAG CURRENT
         userTxtView.setText("le mail de session");
 
@@ -172,11 +158,6 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(this,SettingsActivity.class);
-            startActivity(intent);
-            return true;
-        }
         if(id == R.id.action_refresh){
             Snackbar.make(
                     findViewById(android.R.id.content),
@@ -241,13 +222,9 @@ public class MainActivity extends AppCompatActivity
         }
         if(id == R.id.action_deco){
             //TODO METTRE LE TAG CURRENT DU USER A FALSE
-            /*String filename = "user.save";
-            File file = new File(this.getFilesDir(), filename);
-            Boolean del = file.delete();
-            if(del){
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
-            }*/
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+
             return true;
         }
 
@@ -279,9 +256,6 @@ public class MainActivity extends AppCompatActivity
             newFragment = new Profile();
             toolbar.setTitle("Profile");
             itemMenu.setVisible(false);
-        } else if (id == R.id.nav_settings) {
-            Intent intent = new Intent(this,SettingsActivity.class);
-            startActivity(intent);
         } else if (id == R.id.nav_edit) {
             Intent intent = new Intent(this,EditProfile.class);
             startActivity(intent);

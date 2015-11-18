@@ -194,14 +194,10 @@ public class AddMemoActivity extends AppCompatActivity
                 return true;
             case R.id.action_deco:
                 //TODO METTRE LE TAG CURRENT A FALSE
-                /*String filename = "user.save";
-                File file = new File(this.getFilesDir(), filename);
-                Boolean del = file.delete();
-                System.out.println(del);
-                if(del){
+
                     Intent intentLog = new Intent(this, LoginActivity.class);
                     startActivity(intentLog);
-                }*/
+
                 return true;
 
             default:

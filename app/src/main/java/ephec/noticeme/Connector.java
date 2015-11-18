@@ -102,9 +102,10 @@ public class Connector {
     }
 
     public static String encrypt(String input){
-        String key = "IAmKey!";
+        String key = "Notice Me Sempai";
         byte[] crypted = null;
         try{
+            System.out.println(key.getBytes());
             SecretKeySpec skey = new SecretKeySpec(key.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, skey);
@@ -112,9 +113,7 @@ public class Connector {
         }catch(Exception e){
             System.out.println(e.toString());
         }
-        //return Base64.encodeToString(crypted,Base64.DEFAULT);
-        //TODO mettre le bon return
-        return input;
+        return Base64.encodeToString(crypted,Base64.DEFAULT);
     }
     public static String decrypt(String input){
         String key = "IAmKey!";

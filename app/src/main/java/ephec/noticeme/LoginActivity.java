@@ -1,20 +1,6 @@
 package ephec.noticeme;
 
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.Arrays;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -43,33 +29,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
-import java.security.*;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 
 /**
@@ -119,30 +80,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        StringBuilder text = new StringBuilder();
-        File file = new File(this.getFilesDir(), "user.save");
-        try{
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = br.readLine()) != null) {
-                text.append(line);
-                text.append('£');
-            }
-            br.close();
-        }catch(FileNotFoundException e){
-            return;
-        }
-        catch(Exception e){
-            return;
-        }
-        if(text.toString().isEmpty()){
-            return;
-        }
-        String fromFile[]= text.toString().split("£");
-        mEmailView.setText(fromFile[0]);
-        mPasswordView.setText(fromFile[1]);
-        attemptLogin();
-        //mPasswordView.requestFocus();
+        //TODO AUTOLOGIN
     }
 
     private void populateAutoComplete() {
@@ -321,24 +259,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected Boolean doInBackground(Void... params) {
             Connector co = new Connector();
             if(!co.connect()) return false;
+            System.out.println("connected");
             String response = co.login(mEmail,mPassword);
+            System.out.println("logged");
             if(response.equals("ERROR")) return false;
             if(!co.disconnect()) return false;
 
-            if(response.equals("1")){//TODO DEMANDER DE RECEVOIR L ID DU USER
+            if(!response.equals("0")){
                 System.out.println("Connect successfull !");
-                /*String filename = "user.save";
-                File file = new File(LoginActivity.this.getApplicationContext().getFilesDir(), filename);
-                FileOutputStream outputStream;
-                try {
-                    outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-                    outputStream.write(mEmail.getBytes());
-                    outputStream.write("£".getBytes());
-                    outputStream.write(mPassword.getBytes());
-                    outputStream.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }*/
                 User current = new User();
                 current.setMail(mEmail);
                 current.setPassword(mPassword);
@@ -349,15 +277,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 //TODO connect DB + ADD USER IN DB + METTRE TAG CURRENT A TRUE
 
                 return true;
-            }else if(response.equals("0")){
+            }else{
                 System.out.println("Error Login");
                 return false;
-            }else if(response.equals("3")){
-                System.out.println("User added");
-                return true;
             }
-            System.out.println("PAS BIEN DU TOUT !!!!!!!!");
-            return false;
         }
 
         @Override
