@@ -325,9 +325,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if(response.equals("ERROR")) return false;
             if(!co.disconnect()) return false;
 
-            if(response.equals("1")){
-                String filename = "user.save";
+            if(response.equals("1")){//TODO DEMANDER DE RECEVOIR L ID DU USER
                 System.out.println("Connect successfull !");
+                /*String filename = "user.save";
                 File file = new File(LoginActivity.this.getApplicationContext().getFilesDir(), filename);
                 FileOutputStream outputStream;
                 try {
@@ -338,7 +338,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     outputStream.close();
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
+                }*/
+                User current = new User();
+                current.setMail(mEmail);
+                current.setPassword(mPassword);
+                current.setId(Integer.parseInt(response));
+                current.setGroup(Integer.parseInt(response));
+                current.setNom("");
+                current.setPrenom("");
+                //TODO connect DB + ADD USER IN DB + METTRE TAG CURRENT A TRUE
+
                 return true;
             }else if(response.equals("0")){
                 System.out.println("Error Login");
@@ -361,6 +370,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 //finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
+                mPasswordView.setText("");
                 mPasswordView.requestFocus();
             }
         }

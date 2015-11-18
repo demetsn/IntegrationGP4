@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
-
+//TODO AJOUTER UNE TABLE USER AVEC UN TAG CURRENT
 public class DBHelper extends SQLiteOpenHelper
 {
     private static final String DATABASE_NAME = "noticeMe.db";

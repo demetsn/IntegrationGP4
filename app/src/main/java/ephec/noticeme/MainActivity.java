@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         TextView userTxtView = (TextView)findViewById(R.id.username);
-        File file = new File(this.getFilesDir(), "user.save");
+        /*File file = new File(this.getFilesDir(), "user.save");
         String line;
         try{
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -90,7 +90,9 @@ public class MainActivity extends AppCompatActivity
             return;
         }
         //separation du email et du mdp venant du fichier
-        userTxtView.setText(line.split("£")[0]);
+        userTxtView.setText(line.split("£")[0]);*/
+        //TODO GET LE USER DANS DB AVEC TAG CURRENT
+        userTxtView.setText("le mail de session");
 
         fragmentManager = getSupportFragmentManager();
         // Check that the activity is using the layout version with
@@ -238,13 +240,14 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         if(id == R.id.action_deco){
-            String filename = "user.save";
+            //TODO METTRE LE TAG CURRENT DU USER A FALSE
+            /*String filename = "user.save";
             File file = new File(this.getFilesDir(), filename);
             Boolean del = file.delete();
             if(del){
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
-            }
+            }*/
             return true;
         }
 

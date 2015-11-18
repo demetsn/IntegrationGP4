@@ -103,6 +103,7 @@ public class MemoOverviewActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        //TODO HANDLE DE DISCONNECT BUTTON
         switch (item.getItemId()) {
 
             case R.id.action_cancel:
