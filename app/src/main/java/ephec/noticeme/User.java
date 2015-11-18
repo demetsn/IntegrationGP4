@@ -36,6 +36,14 @@ public class User {
         this.prenom = prenom;
     }
 
+    public String getMail() {
+        return mail;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
+
     public int getGroup() {
         return groupId;
     }
