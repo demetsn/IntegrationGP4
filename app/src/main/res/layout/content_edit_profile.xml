@@ -9,4 +9,36 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/activity_edit_profile" tools:context="ephec.noticeme.EditProfile">
 
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editProfileName"
+        android:hint="@string/editProfileName"
+        android:textColorHint="@color/lightGrey"
+        android:layout_marginTop="5dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editProfileFirstname"
+        android:hint="@string/editProfileFirstname"
+        android:textColorHint="@color/lightGrey"
+        android:layout_below="@+id/editProfileName"
+        android:layout_marginTop="5dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editProfileEmail"
+        android:hint="@string/editProfileEmail"
+        android:textColorHint="@color/lightGrey"
+        android:layout_below="@+id/editProfileFirstname"
+        android:layout_marginTop="5dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>

@@ -33,6 +33,11 @@
     <string name="addMemoSave">Save memo</string>
     <string name="addMemoCancel">Cancel</string>
 
+    <!-- Strings related to editProfile -->
+    <string name="editProfileName">Lastame</string>
+    <string name="editProfileFirstname">Firstame</string>
+    <string name="editProfileEmail">Email</string>
+
     <!-- Strings related to Settings -->
         <!-- Example General settings -->
     <string name="pref_header_general">General</string>

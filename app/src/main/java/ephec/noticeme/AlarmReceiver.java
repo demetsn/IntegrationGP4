@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
@@ -30,9 +31,10 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         //this will send a notification message
         //ComponentName comp = new ComponentName(context.getPackageName(),
         //        AlarmService.class.getName());
+        Bundle extras = intent.getExtras();
         Intent service = new Intent(context,AlarmService.class);
-        service.putExtra("memoTitle","Test");
-        startWakefulService(context,service);
+        service.putExtra("memoTitle", extras.getString("memotitle"));
+        startWakefulService(context, service);
         //startWakefulService(context, (intent.setComponent(comp)));
         setResultCode(Activity.RESULT_OK);
 

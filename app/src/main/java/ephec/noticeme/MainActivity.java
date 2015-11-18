@@ -291,6 +291,7 @@ public class MainActivity extends AppCompatActivity
     private void setTimedAlert(Alarm memo) {
         Intent intentAlarm = new Intent(this,AlarmReceiver.class);
         intentAlarm.putExtra("memoTitle", memo.getTitle());
+        System.out.println(memo.getTitle());
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intentAlarm, 0);
 
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
