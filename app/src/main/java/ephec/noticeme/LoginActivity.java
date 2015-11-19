@@ -258,7 +258,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             Connector co = new Connector();
-            if(!co.connect()) return false;
+            if(!co.connect("http://superpie.ddns.net:8035/app_dev.php/android/login")) return false;
             System.out.println("connected");
             String response = co.login(mEmail,mPassword);
             System.out.println("logged");

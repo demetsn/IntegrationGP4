@@ -26,9 +26,9 @@ public class Connector {
         super();
     }
 
-    public boolean connect(){
+    public boolean connect(String adresse){
         try{
-            url = new URL("http://superpie.ddns.net:8035/app_dev.php/android/login");
+            url = new URL(adresse);
             conn = (HttpURLConnection) url.openConnection();
             conn.setReadTimeout(100000);
             conn.setConnectTimeout(150000);
