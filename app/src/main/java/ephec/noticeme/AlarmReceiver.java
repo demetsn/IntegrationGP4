@@ -33,7 +33,7 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         //        AlarmService.class.getName());
         Bundle extras = intent.getExtras();
         Intent service = new Intent(context,AlarmService.class);
-        service.putExtra("memoTitle", extras.getString("memotitle"));
+        service.putExtra("memoTitle", extras.getString("memoTitle"));
         startWakefulService(context, service);
         //startWakefulService(context, (intent.setComponent(comp)));
         setResultCode(Activity.RESULT_OK);

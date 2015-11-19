@@ -44,18 +44,17 @@ import java.util.Calendar;
 import java.util.Iterator;
 
 //TODO BUG QUAND ON CHANGE DE USER
-//TODO CLEAR LE FILE + CLEAR LA DB
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 120000 ;//en millisecondes
-    private static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 100;
+    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 60000 ;//en millisecondes
+    private static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 50;
     public static FragmentManager fragmentManager;
     private MenuItem itemMenu;
     private Toolbar toolbar;
     private BroadcastReceiver br;
-    private float radius = 100f;
+    private float radius = 100;
     private static ArrayList<Alarm> LAlarm ;
     private static ArrayList<Alarm> AlarmToRestore;
     private static int mNotificationId = 0;
@@ -388,12 +387,6 @@ public class MainActivity extends AppCompatActivity
         NotificationManager mNotificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
 
-        // Sets up the Snooze and Dismiss action buttons that will appear in the
-        // expanded view of the notification.
-        Intent dismissIntent = new Intent(this, MemoOverviewActivity.class);
-        dismissIntent.setAction("ACTION_DISMISS");
-        dismissIntent.putExtra("memoTitle", title);
-        PendingIntent piDismiss = PendingIntent.getService(this, 0, dismissIntent, 0);
 
         Intent snoozeIntent = new Intent(this, MemoOverviewActivity.class);
         snoozeIntent.setAction("ACTION_SNOOZE");
@@ -404,15 +397,10 @@ public class MainActivity extends AppCompatActivity
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("NoticeMe notification")
-                        .setContentText(title)
+                        .setContentTitle(title)
+                        .setContentText("location reached")
                         .setAutoCancel(true)
-                        .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
-
-                        .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText(description))
-                        .addAction (R.drawable.ic_action_cancel,
-                                "dismiss", piDismiss)
+                        .setDefaults(Notification.DEFAULT_ALL)
                         .addAction (R.drawable.ic_action_plus,
                                 "Snooze", piSnooze);
 
@@ -432,6 +420,7 @@ public class MainActivity extends AppCompatActivity
                 );
 
         builder.setContentIntent(resultPendingIntent);
+        //TODO UTILISER LID DU MEMO
         mNotificationId++;
         mNotificationManager.notify(mNotificationId, builder.build());
 
