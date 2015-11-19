@@ -1,10 +1,12 @@
 package ephec.noticeme;
 
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.JsonReader;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +23,11 @@ import android.widget.Toast;
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -39,7 +46,9 @@ public class MemoList extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_memo_list, container, false);
-        mDataList = new ArrayList();
+        mDataList = new ArrayList<>();
+
+        //getFromServer();;
         fillMemoList();
         MainActivity.clearList();
         mDrawableBuilder = TextDrawable.builder()
@@ -49,6 +58,62 @@ public class MemoList extends Fragment {
         listView.setAdapter(new SampleAdapter());
 
         return view;
+    }
+
+    private void getFromServer(){
+        Connector co = new Connector();
+        co.connect("http://superpie.ddns.net:8035/app_dev.php/android/memolist");
+        String mail = "";
+        String pass = "";
+        String response = co.login(mail,pass);
+        if(response.equals("0")){
+            try{
+                //TODO AFFICHER UN TOAST QUI PREVIENT DE LA DECO
+                Thread.sleep(2000);
+            }catch (Exception e){
+
+            }
+            co.disconnect();
+            Intent intent = new Intent(this.getContext(), LoginActivity.class);
+            startActivity(intent);
+            return;
+        }else{
+            DBHelper db = new DBHelper(getActivity());
+            db.getWritableDatabase();
+            try{
+
+
+                JSONObject obj = new JSONObject(response);
+                JSONArray jArray = obj.getJSONArray("json");
+                for (int i=0; i < jArray.length(); i++)
+                {
+                    JSONObject oneObject = jArray.getJSONObject(i);
+                    String desc = oneObject.getString("desc");
+                    String titre = oneObject.getString("title");
+                    String date = oneObject.getString("date");
+                    double lat = oneObject.getDouble("lat");
+                    double longi = oneObject.getDouble("long");
+                    int id = oneObject.getInt("id");
+                    Alarm temp = new Alarm();
+                    temp.setId(id);
+                    temp.setLatitude(lat);
+                    temp.setLongitude(longi);
+                    temp.setDescription(desc);
+                    temp.setTitle(titre);
+                    temp.setAlarmDate(date.replace(' ', '&'));
+                    db.addAlarm(temp);
+                    mDataList.add(new ListData(temp));
+                }
+
+            }catch (Exception e){
+                //TODO AFFICHER TOAST ERREUR CO SERVER
+                db.close();
+                co.disconnect();
+                return;
+            }
+            db.close();
+        }
+        co.disconnect();
     }
     private void fillMemoList() {
 

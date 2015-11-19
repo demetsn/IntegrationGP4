@@ -12,7 +12,6 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 public class AlarmService extends IntentService {
-    private static int mNotificationId = 0;
 
     public AlarmService() {
         super("AlarmService");
@@ -29,11 +28,9 @@ public class AlarmService extends IntentService {
             db.close();
             launchNotification(memo);
         }
-        //launchNotification("Titre du memo", "Description du memo");
     }
 
-    //TODO REDIRECT WHEN CLICK ON NOTIFICATION
-    //TODO BUTTON SNOOZE AND DISSMISS
+    //TODO BUTTON SNOOZE
 
     public void launchNotification(Alarm memo){
         NotificationManager mNotificationManager = (NotificationManager)
@@ -41,10 +38,6 @@ public class AlarmService extends IntentService {
 
         // Sets up the Snooze and Dismiss action buttons that will appear in the
         // expanded view of the notification.
-        Intent dismissIntent = new Intent(this, MemoOverviewActivity.class);
-        //dismissIntent.setAction("ACTION_DISMISS");
-        dismissIntent.putExtra("memoTitle", memo.getTitle());
-        PendingIntent piDismiss = PendingIntent.getService(this, 0, dismissIntent, 0);
 
         Intent snoozeIntent = new Intent(this, MemoOverviewActivity.class);
         //snoozeIntent.setAction("ACTION_SNOOZE");
@@ -59,10 +52,6 @@ public class AlarmService extends IntentService {
                         .setContentText("Timer has expired !")
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
-                        .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText(memo.getDescription()))
-                        .addAction (R.drawable.ic_action_cancel,
-                                "dismiss", piDismiss)
                         .addAction (R.drawable.ic_action_plus,
                                 "Snooze", piSnooze);
 
@@ -78,8 +67,7 @@ public class AlarmService extends IntentService {
         //        PendingIntent.getActivity(this, 0, resultIntent, 0);
 
         builder.setContentIntent(resultPendingIntent);
-        mNotificationId++;
-        mNotificationManager.notify(mNotificationId, builder.build());
+        mNotificationManager.notify(memo.getId(), builder.build());
 
     }
 }
