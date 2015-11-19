@@ -15,6 +15,7 @@ public class DBHelper extends SQLiteOpenHelper
     private static final String DATABASE_NAME = "noticeMe.db";
     private static final int DATABASE_VERSION = 1;
 
+    //Table for the memos
     private static final String TABLE_ALARMS = "alarms";
 
     private static final String COlUMN_ID = "id";
@@ -26,6 +27,18 @@ public class DBHelper extends SQLiteOpenHelper
     private static final String COLUMN_LONGITUDE = "longitude";
     private static final String COLUMN_ALARM_DATE = "alarmDate";
 
+    //Table for the users
+    private static final String TABLE_USERS = "users";
+
+    private static final String COlUMN_USER_ID = "userId";
+    private static final String COLUMN_USER_GROUP_ID = "userGroupeId";
+    private static final String COlUMN_USER_NAME = "name";
+    private static final String COLUMN_USER_FIRSTNAME = "firstname";
+    private static final String COlUMN_USER_EMAIL = "email";
+    private static final String COLUMN_USER_PWD = "pwd";
+    private static final String COLUMN_ISCURRENT = "isCurrent";
+
+    //Create the memos table
     private static final String REQUETE_CREATION_ALARM = "create table "
             + TABLE_ALARMS + " ( "
             + COlUMN_ID + " integer primary key not null,"
@@ -37,6 +50,16 @@ public class DBHelper extends SQLiteOpenHelper
             + COLUMN_LONGITUDE + " , "
             + COLUMN_ALARM_DATE + " datetime ); ";
 
+    private static final String REQUETE_CREATION_USERS = "create table "
+            + TABLE_USERS + " ( "
+            + COlUMN_USER_ID + " integer primary key not null, "
+            + COLUMN_USER_GROUP_ID + " integer, "
+            + COlUMN_USER_NAME + " , "
+            + COLUMN_USER_FIRSTNAME + " , "
+            + COlUMN_USER_EMAIL + " , "
+            + COLUMN_USER_PWD +" , "
+            + COLUMN_ISCURRENT + " boolean ); ";
+
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -45,6 +68,7 @@ public class DBHelper extends SQLiteOpenHelper
     public void onCreate(SQLiteDatabase db)
     {
         db.execSQL(REQUETE_CREATION_ALARM);
+        db.execSQL(REQUETE_CREATION_USERS);
     }
 
     @Override
@@ -53,6 +77,7 @@ public class DBHelper extends SQLiteOpenHelper
                 "Upgrading database from version " + oldVersion + " to "
                         + newVersion + ", which will destroy all old data");
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ALARMS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         onCreate(db);
     }
 
@@ -76,6 +101,31 @@ public class DBHelper extends SQLiteOpenHelper
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.insert(TABLE_ALARMS, null, alarmValue);
+
+        db.close();
+
+        result = true;
+
+        return result;
+    }
+
+    public boolean addUser(User user) {
+
+        boolean result = false;
+
+        ContentValues userValues = new ContentValues();
+
+        userValues.put(COlUMN_USER_ID, user.getId());
+        userValues.put(COLUMN_GROUP_ID, user.getGroup());
+        userValues.put(COlUMN_USER_NAME, user.getNom());
+        userValues.put(COLUMN_USER_FIRSTNAME, user.getPrenom());
+        userValues.put(COlUMN_USER_EMAIL, user.getMail());
+        userValues.put(COLUMN_USER_PWD, user.getPassword());
+        userValues.put(COLUMN_ISCURRENT, true);
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.insert(TABLE_USERS, null, userValues);
 
         db.close();
 
@@ -112,6 +162,60 @@ public class DBHelper extends SQLiteOpenHelper
         }
         db.close();
         return alarm;
+    }
+
+    public User getUser(int id)
+    {
+        String query = "Select * FROM " + TABLE_USERS + " WHERE " + COlUMN_USER_ID + " = \"" + id + "\"";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        User user = new User();
+
+        if (cursor.moveToFirst()){
+            cursor.moveToFirst();
+
+            user.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_USER_ID))));
+            user.setGroup((cursor.getInt(cursor.getColumnIndex(COLUMN_USER_GROUP_ID))));
+            user.setNom((cursor.getString(cursor.getColumnIndex(COlUMN_USER_NAME))));
+            user.setPrenom((cursor.getString(cursor.getColumnIndex(COLUMN_USER_FIRSTNAME))));
+            user.setMail((cursor.getString(cursor.getColumnIndex(COlUMN_USER_EMAIL))));
+            user.setPassword((cursor.getString(cursor.getColumnIndex(COLUMN_USER_PWD))));
+
+        } else {
+            user = null;
+        }
+        db.close();
+        return user;
+    }
+
+    public User getCurrentUSer()
+    {
+        String query = "Select * FROM " + TABLE_USERS + " WHERE " + COLUMN_ISCURRENT + " = true ";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        User user = new User();
+
+        if (cursor.moveToFirst()){
+            cursor.moveToFirst();
+
+            user.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_USER_ID))));
+            user.setGroup((cursor.getInt(cursor.getColumnIndex(COLUMN_USER_GROUP_ID))));
+            user.setNom((cursor.getString(cursor.getColumnIndex(COlUMN_USER_NAME))));
+            user.setPrenom((cursor.getString(cursor.getColumnIndex(COLUMN_USER_FIRSTNAME))));
+            user.setMail((cursor.getString(cursor.getColumnIndex(COlUMN_USER_EMAIL))));
+            user.setPassword((cursor.getString(cursor.getColumnIndex(COLUMN_USER_PWD))));
+
+        } else {
+            user = null;
+        }
+        db.close();
+        return user;
     }
 
     public Alarm getAlarm(String title) {
@@ -223,6 +327,30 @@ public class DBHelper extends SQLiteOpenHelper
         return result;
     }
 
+    public boolean deleteUser(int id){
+
+        boolean result = false;
+
+        String query = "Select * FROM " + TABLE_USERS + " WHERE " + COLUMN_TITLE + " =  \"" + id + "\"";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        User user = new User();
+
+        if (cursor.moveToFirst())
+        {
+            user.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_USER_ID))));
+            db.delete(TABLE_USERS, COlUMN_USER_ID + " = ?",
+                    new String[]{String.valueOf(user.getId())});
+            cursor.close();
+            result = true;
+        }
+        db.close();
+        return result;
+    }
+
     public boolean modifyAlarm(Alarm alarm) {
 
         boolean result = false;
@@ -243,6 +371,58 @@ public class DBHelper extends SQLiteOpenHelper
         db.update(TABLE_ALARMS, values, COlUMN_ID + "=" + alarm.getId(), null);
 
         result = true;
+        return result;
+    }
+
+    public boolean modifyUser(User user){
+
+        boolean result = false;
+
+        ContentValues userValues = new ContentValues();
+
+        userValues.put(COlUMN_USER_ID, user.getId());
+        userValues.put(COLUMN_GROUP_ID, user.getGroup());
+        userValues.put(COlUMN_USER_NAME, user.getNom());
+        userValues.put(COLUMN_USER_FIRSTNAME, user.getPrenom());
+        userValues.put(COlUMN_USER_EMAIL, user.getMail());
+        userValues.put(COLUMN_USER_PWD, user.getPassword());
+        userValues.put(COLUMN_ISCURRENT, true);
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.update(TABLE_USERS, userValues, COlUMN_USER_ID + " = " + user.getId(), null);
+
+        db.close();
+
+        result = true;
+
+        return result;
+    }
+
+    public boolean setCurrentToFalse(){
+
+        boolean result = false;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        User current = getCurrentUSer();
+
+        ContentValues userValues = new ContentValues();
+
+        userValues.put(COlUMN_USER_ID, current.getId());
+        userValues.put(COLUMN_GROUP_ID, current.getGroup());
+        userValues.put(COlUMN_USER_NAME, current.getNom());
+        userValues.put(COLUMN_USER_FIRSTNAME, current.getPrenom());
+        userValues.put(COlUMN_USER_EMAIL, current.getMail());
+        userValues.put(COLUMN_USER_PWD, current.getPassword());
+        userValues.put(COLUMN_ISCURRENT, false);
+
+        db.update(TABLE_USERS, userValues, COlUMN_USER_ID + " = " + current.getId(), null);
+
+        db.close();
+
+        result = true;
+
         return result;
     }
 
