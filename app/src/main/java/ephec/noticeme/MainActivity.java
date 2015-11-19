@@ -371,7 +371,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onReceive(Context c, Intent i) {
 
-                launchNotification(i.getExtras().getString("memoTitle"), "La description a lancer et faut recuperer");
+                launchNotification(i.getExtras().getString("memoTitle"));
                 c.unregisterReceiver(br);
             }
         };
@@ -383,7 +383,7 @@ public class MainActivity extends AppCompatActivity
         //registerReceiver(new AlarmReceiver(),intentAlarm);
     }
 
-    public void launchNotification(String title,String description){
+    public void launchNotification(String title){
         NotificationManager mNotificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
 

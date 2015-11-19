@@ -30,7 +30,6 @@ public class AlarmService extends IntentService {
         }
     }
 
-    //TODO REDIRECT WHEN CLICK ON NOTIFICATION
     //TODO BUTTON SNOOZE
 
     public void launchNotification(Alarm memo){
