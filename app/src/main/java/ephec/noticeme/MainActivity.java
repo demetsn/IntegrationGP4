@@ -81,7 +81,6 @@ public class MainActivity extends AppCompatActivity
         db.getReadableDatabase();
         User current = db.getCurrentUSer();
         db.close();
-
         userTxtView.setText(current.getMail());
 
         fragmentManager = getSupportFragmentManager();

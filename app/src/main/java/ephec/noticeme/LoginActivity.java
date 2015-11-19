@@ -80,16 +80,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        //TODO AUTOLOGIN
         DBHelper db = new DBHelper(this);
         db.getWritableDatabase();
         User current = db.getCurrentUSer();
         db.close();
         if (current != null) {
             mEmailView.setText(current.getMail());
-            System.out.println("crypt pass : " + Connector.decrypt(current.getPassword()));
-            System.out.println("pass : "+current.getPassword());
-            mPasswordView.setText(Connector.decrypt(current.getPassword()));
+            //TODO  TRUC TROP ZARB
+            mPasswordView.setText(Connector.decrypt(Connector.decrypt(current.getPassword())));
             attemptLogin();
         }
     }
@@ -288,7 +286,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 //TODO connect DB + ADD USER IN DB + METTRE TAG CURRENT A TRUE
                 DBHelper db = new DBHelper(LoginActivity.this);
                 db.getWritableDatabase();
-                db.addUser(current);
+                User exist = db.getUser(Integer.parseInt(response));
+                if(exist == null){
+                    db.addUser(current);
+                }
                 db.close();
                 return true;
             }else{
