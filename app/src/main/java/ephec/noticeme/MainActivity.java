@@ -77,7 +77,12 @@ public class MainActivity extends AppCompatActivity
 
         TextView userTxtView = (TextView)findViewById(R.id.username);
         //TODO GET LE USER DANS DB AVEC TAG CURRENT
-        userTxtView.setText("le mail de session");
+        DBHelper db = new DBHelper(this.getApplicationContext());
+        db.getReadableDatabase();
+        User current = db.getCurrentUSer();
+        db.close();
+
+        userTxtView.setText(current.getMail());
 
         fragmentManager = getSupportFragmentManager();
         // Check that the activity is using the layout version with

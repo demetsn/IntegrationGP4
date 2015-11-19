@@ -85,10 +85,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         db.getWritableDatabase();
         User current = db.getCurrentUSer();
         db.close();
-        mEmailView.setText(current.getMail());
-        mPasswordView.setText(Connector.decrypt(current.getPassword()));
-        attemptLogin();
-
+        if (current != null) {
+            mEmailView.setText(current.getMail());
+            System.out.println("crypt pass : " + Connector.decrypt(current.getPassword()));
+            System.out.println("pass : "+current.getPassword());
+            mPasswordView.setText(Connector.decrypt(current.getPassword()));
+            attemptLogin();
+        }
     }
 
     private void populateAutoComplete() {

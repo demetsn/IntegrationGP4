@@ -118,7 +118,7 @@ public class Connector {
         return Base64.encodeToString(crypted,Base64.DEFAULT);
     }
     public static String decrypt(String input){
-        String key = "IAmKey!";
+        String key = "Notice Me Sempai";
         byte[] output = null;
         try{
             SecretKeySpec skey = new SecretKeySpec(key.getBytes(), "AES");
