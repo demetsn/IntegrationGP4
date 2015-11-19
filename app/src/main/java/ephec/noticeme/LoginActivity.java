@@ -81,6 +81,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
 
         //TODO AUTOLOGIN
+        DBHelper db = new DBHelper(this);
+        db.getWritableDatabase();
+        User current = db.getCurrentUSer();
+        db.close();
+        mEmailView.setText(current.getMail());
+        mPasswordView.setText(Connector.decrypt(current.getPassword()));
+        attemptLogin();
+
     }
 
     private void populateAutoComplete() {
@@ -275,7 +283,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 current.setNom("");
                 current.setPrenom("");
                 //TODO connect DB + ADD USER IN DB + METTRE TAG CURRENT A TRUE
-
+                DBHelper db = new DBHelper(LoginActivity.this);
+                db.getWritableDatabase();
+                db.addUser(current);
+                db.close();
                 return true;
             }else{
                 System.out.println("Error Login");

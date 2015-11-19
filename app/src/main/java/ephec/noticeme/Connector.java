@@ -3,6 +3,7 @@ package ephec.noticeme;
 
 import android.net.Uri;
 import android.util.Base64;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -65,7 +66,8 @@ public class Connector {
             bufferedReader.close();
             inputStream.close();
         }catch (Exception e){
-            System.out.println("Une Exception dans login : "+e);
+
+            e.printStackTrace();
             return "ERROR";
         }
         return response;

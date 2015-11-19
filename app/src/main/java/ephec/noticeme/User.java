@@ -53,7 +53,7 @@ public class User {
     }
 
     public String getPassword() {
-        return Connector.decrypt(password);
+        return password;
     }
 
     public void setPassword(String password) {
