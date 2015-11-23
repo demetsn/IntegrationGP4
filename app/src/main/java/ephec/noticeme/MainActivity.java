@@ -6,7 +6,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +34,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.gcm.Task;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,18 +47,20 @@ import java.util.Iterator;
 //TODO BUG QUAND ON CHANGE DE USER
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener{
 
-    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 60000 ;//en millisecondes
+    private final String PROX_ALERT_INTENT = "ephec.noticeme";
+    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 15000 ;//en millisecondes
     private static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 50;
     public static FragmentManager fragmentManager;
     private MenuItem itemMenu;
     private Toolbar toolbar;
-    private BroadcastReceiver br;
-    private float radius = 100;
+    private float radius = 50;
     private static ArrayList<Alarm> LAlarm ;
     private static ArrayList<Alarm> AlarmToRestore;
     private static int mNotificationId = 0;
+    private LocationManager locManager;
+    private LocationListener locListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +70,10 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Memo List");
         LAlarm = new ArrayList<>();
+
+        locManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MINIMUM_TIME_BETWEEN_UPDATE, MINIMUM_DISTANCECHANGE_FOR_UPDATE, new myLocationListener());
+        locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MINIMUM_TIME_BETWEEN_UPDATE, MINIMUM_DISTANCECHANGE_FOR_UPDATE, new myLocationListener());
 
         Bundle extras = getIntent().getExtras();
         if(extras != null){
@@ -290,8 +297,7 @@ public class MainActivity extends AppCompatActivity
     private void setTimedAlert(Alarm memo) {
         Intent intentAlarm = new Intent(this,AlarmReceiver.class);
         intentAlarm.putExtra("memoTitle", memo.getTitle());
-        System.out.println(memo.getTitle());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intentAlarm, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId()-(2*memo.getId()), intentAlarm, 0);
 
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         manager.setExact(AlarmManager.RTC_WAKEUP, getTime(memo), pendingIntent);
@@ -323,64 +329,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setProximityAlert(Alarm memo) {
-        LocationManager locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        final LocationListener locListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-            }
+        //Intent intent = new Intent("ephec.noticeme"+memo.getTitle());
+        Intent intent = new Intent(this, GeoReceiver.class);
 
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
+        Toast.makeText(getApplicationContext(), "Création de l'intent dans setproximityalert "
+                +memo.getTitle()+" ID du memo "+memo.getId()
+                + " lat : "+memo.getLatitude()
+                + " long : "+memo.getLongitude(), Toast.LENGTH_LONG).show();
 
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
-
-        locManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                MINIMUM_TIME_BETWEEN_UPDATE,
-                MINIMUM_DISTANCECHANGE_FOR_UPDATE,
-                locListener
-        );
-
-
-        Intent intent = new Intent("ephec.noticceme"+memo.getTitle());
         intent.putExtra("memoTitle", memo.getTitle());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
-
-        geoSetup(memo.getTitle());
-    }
-
-    // Prépare the alarm.
-    public void geoSetup(String title) {
-
-        IntentFilter filter =  new IntentFilter("ephec.noticceme"+title);
-        br = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context c, Intent i) {
-
-                launchNotification(i.getExtras().getString("memoTitle"));
-                c.unregisterReceiver(br);
-            }
-        };
-        registerReceiver(br, new IntentFilter("ephec.noticeme"));
-
-        //Intent intentAlarm = new Intent(this,AlarmReceiver.class);
-        //intentAlarm.putExtra("memoTitle", title);
-        //PendingIntent pendingIntent = PendingIntent.getBroadcast(this, title.charAt(0), intentAlarm, 0);
-        //registerReceiver(new AlarmReceiver(),intentAlarm);
     }
 
     public void launchNotification(String title){
@@ -436,4 +398,38 @@ public class MainActivity extends AppCompatActivity
         LAlarm = new ArrayList<>();
     }
 
+    public class myLocationListener implements LocationListener {
+
+        @Override
+        public void onLocationChanged(Location location) {
+            Toast.makeText(getApplicationContext(), "lat : " + location.getLatitude()+ " long : "+location.getLongitude(), Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    }
+
+    public class myBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context c, Intent i) {
+
+            Toast.makeText(getApplicationContext(), "Launching Notification " + i.getExtras().getString("memoTitle"), Toast.LENGTH_LONG).show();
+            Intent intentAlarm = new Intent(getApplicationContext(),AlarmService.class);
+            intentAlarm.putExtra("memoTitle", i.getExtras().getString("memoTitle"));
+            startActivity(intentAlarm);
+        }
+    }
 }

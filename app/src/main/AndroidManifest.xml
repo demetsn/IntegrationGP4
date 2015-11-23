@@ -84,6 +84,10 @@
             android:name=".AlarmService"
             android:enabled="true" />
         <receiver android:name=".AlarmReceiver" />
+        <service
+            android:name=".AlarmService"
+            android:enabled="true" />
+        <receiver android:name=".GeoReceiver" />
     </application>
 
 </manifest>
