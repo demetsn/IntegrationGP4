@@ -9,6 +9,7 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -47,6 +48,7 @@ import java.util.List;
 public class MemoList extends Fragment {
 
     private static final int HIGHLIGHT_COLOR = 0x999be6ff;
+    private static int compteur = 0;
 
     private ColorGenerator mColorGenerator = ColorGenerator.MATERIAL;
     private TextDrawable.IBuilder mDrawableBuilder;
@@ -61,8 +63,12 @@ public class MemoList extends Fragment {
 
 
         //ASYNCTASK
-        FillMemoTask syncTask = new FillMemoTask(getActivity());
-        syncTask.execute((Void) null);
+        if(compteur == 0){
+            compteur++;
+            FillMemoTask syncTask = new FillMemoTask(getActivity());
+            syncTask.execute((Void) null);
+        }
+
 
 
         fillMemoList();
@@ -239,7 +245,16 @@ public class MemoList extends Fragment {
             if(!co.connect("http://superpie.ddns.net:8035/app_dev.php/android/memolist")) return false;
             String mail = "";
             String pass = "";
+            DBHelper db1 = new DBHelper(context);
+            db1.getWritableDatabase();
+            User usr = db1.getCurrentUSer();
+            mail = usr.getMail();
+            pass = Connector.decrypt(Connector.decrypt(usr.getPassword()));
+            System.out.println(mail);
+            System.out.println(pass);
+            db1.close();
             String response = co.login(mail,pass);
+            System.out.println("reponse : "+response);
             if(response.equals("0")){
                 try{
                     //TODO AFFICHER UN TOAST QUI PREVIENT DE LA DECO
@@ -248,10 +263,13 @@ public class MemoList extends Fragment {
 
                 }
                 co.disconnect();
-                Intent intent = new Intent(context, LoginActivity.class);
-                startActivity(intent);
+                //Intent intent = new Intent(context, LoginActivity.class);
+                //startActivity(intent);
+                System.out.println("Je suis ici mais le log est ok");
                 return false;
             }else{
+                response = android.text.Html.fromHtml(response).toString();
+                System.out.println("responce : "+response);
                 DBHelper db = new DBHelper(context);
                 db.getWritableDatabase();
                 try{
@@ -259,22 +277,27 @@ public class MemoList extends Fragment {
                     JSONArray jArray = obj.getJSONArray("json");
                     for (int i=0; i < jArray.length(); i++)
                     {
-                        JSONObject oneObject = jArray.getJSONObject(i);
-                        String desc = oneObject.getString("desc");
-                        String titre = oneObject.getString("title");
-                        String date = oneObject.getString("date");
-                        double lat = oneObject.getDouble("lat");
-                        double longi = oneObject.getDouble("long");
-                        int id = oneObject.getInt("id");
-                        Alarm temp = new Alarm();
-                        temp.setId(id);
-                        temp.setLatitude(lat);
-                        temp.setLongitude(longi);
-                        temp.setDescription(desc);
-                        temp.setTitle(titre);
-                        temp.setAlarmDate(date.replace(' ', '&'));
-                        db.addAlarm(temp);
-                        mDataList.add(new ListData(temp));
+                        try{
+                            JSONObject oneObject = jArray.getJSONObject(i);
+                            String desc = oneObject.getString("desc");
+                            String titre = oneObject.getString("title");
+                            String date = oneObject.getString("date");
+                            double lat = oneObject.getDouble("lat");
+                            double longi = oneObject.getDouble("long");
+                            int id = oneObject.getInt("id");
+                            Alarm temp = new Alarm();
+                            temp.setId(id);
+                            temp.setLatitude(lat);
+                            temp.setLongitude(longi);
+                            temp.setDescription(desc);
+                            temp.setTitle(titre);
+                            temp.setAlarmDate(date.replace(' ', '&'));
+                            db.addAlarm(temp);
+                            mDataList.add(new ListData(temp));
+
+                        }catch (SQLiteConstraintException e){
+
+                        }
                     }
 
                 }catch (Exception e){
@@ -287,6 +310,16 @@ public class MemoList extends Fragment {
             }
             co.disconnect();
             return true;
+        }
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if (success) {
+                Intent intent= new Intent(MemoList.this.getContext(),MainActivity.class);
+                startActivity(intent);
+                //finish();
+            } else {
+
+            }
         }
     }
 }
