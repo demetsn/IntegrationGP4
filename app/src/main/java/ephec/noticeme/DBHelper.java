@@ -1,6 +1,6 @@
 package ephec.noticeme;
 
-//TODO AJOUTER UNE BDD USER
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
-//TODO AJOUTER UNE TABLE USER AVEC UN TAG CURRENT
+
 public class DBHelper extends SQLiteOpenHelper
 {
     private static final String DATABASE_NAME = "noticeMe.db";
@@ -58,7 +58,7 @@ public class DBHelper extends SQLiteOpenHelper
             + COLUMN_USER_FIRSTNAME + " , "
             + COlUMN_USER_EMAIL + " , "
             + COLUMN_USER_PWD +" , "
-            + COLUMN_ISCURRENT + " boolean ); ";
+            + COLUMN_ISCURRENT + " integer ); ";
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -116,12 +116,12 @@ public class DBHelper extends SQLiteOpenHelper
         ContentValues userValues = new ContentValues();
 
         userValues.put(COlUMN_USER_ID, user.getId());
-        userValues.put(COLUMN_GROUP_ID, user.getGroup());
+        userValues.put(COLUMN_USER_GROUP_ID, user.getGroup());
         userValues.put(COlUMN_USER_NAME, user.getNom());
         userValues.put(COLUMN_USER_FIRSTNAME, user.getPrenom());
         userValues.put(COlUMN_USER_EMAIL, user.getMail());
         userValues.put(COLUMN_USER_PWD, user.getPassword());
-        userValues.put(COLUMN_ISCURRENT, true);
+        userValues.put(COLUMN_ISCURRENT, 1);
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -193,7 +193,7 @@ public class DBHelper extends SQLiteOpenHelper
 
     public User getCurrentUSer()
     {
-        String query = "Select * FROM " + TABLE_USERS + " WHERE " + COLUMN_ISCURRENT + " = true ";
+        String query = "Select * FROM " + TABLE_USERS + " WHERE " + COLUMN_ISCURRENT + " = \"1\" ";
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -381,12 +381,12 @@ public class DBHelper extends SQLiteOpenHelper
         ContentValues userValues = new ContentValues();
 
         userValues.put(COlUMN_USER_ID, user.getId());
-        userValues.put(COLUMN_GROUP_ID, user.getGroup());
+        userValues.put(COLUMN_USER_GROUP_ID, user.getGroup());
         userValues.put(COlUMN_USER_NAME, user.getNom());
         userValues.put(COLUMN_USER_FIRSTNAME, user.getPrenom());
         userValues.put(COlUMN_USER_EMAIL, user.getMail());
         userValues.put(COLUMN_USER_PWD, user.getPassword());
-        userValues.put(COLUMN_ISCURRENT, true);
+        //userValues.put(COLUMN_ISCURRENT, 1);
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -410,12 +410,12 @@ public class DBHelper extends SQLiteOpenHelper
         ContentValues userValues = new ContentValues();
 
         userValues.put(COlUMN_USER_ID, current.getId());
-        userValues.put(COLUMN_GROUP_ID, current.getGroup());
+        userValues.put(COLUMN_USER_GROUP_ID, current.getGroup());
         userValues.put(COlUMN_USER_NAME, current.getNom());
         userValues.put(COLUMN_USER_FIRSTNAME, current.getPrenom());
         userValues.put(COlUMN_USER_EMAIL, current.getMail());
         userValues.put(COLUMN_USER_PWD, current.getPassword());
-        userValues.put(COLUMN_ISCURRENT, false);
+        userValues.put(COLUMN_ISCURRENT, 0);
 
         db.update(TABLE_USERS, userValues, COlUMN_USER_ID + " = " + current.getId(), null);
 
