@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         TextView userTxtView = (TextView)findViewById(R.id.username);
-        //TODO GET LE USER DANS DB AVEC TAG CURRENT
+
         DBHelper db = new DBHelper(this.getApplicationContext());
         db.getReadableDatabase();
         User current = db.getCurrentUSer();
@@ -231,7 +231,10 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         if(id == R.id.action_deco){
-            //TODO METTRE LE TAG CURRENT DU USER A FALSE
+            DBHelper db1 = new DBHelper(this);
+            db1.getReadableDatabase();
+            db1.setCurrentToFalse();
+            db1.close();
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
 
@@ -261,10 +264,6 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_maps) {
             newFragment = new MapFragment();
             toolbar.setTitle("Memo on map");
-            itemMenu.setVisible(false);
-        } else if (id == R.id.nav_profile) {
-            newFragment = new Profile();
-            toolbar.setTitle("Profile");
             itemMenu.setVisible(false);
         } else if (id == R.id.nav_edit) {
             Intent intent = new Intent(this,EditProfile.class);
@@ -348,49 +347,6 @@ public class MainActivity extends AppCompatActivity
         locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
     }
 
-    public void launchNotification(String title){
-        NotificationManager mNotificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
-
-
-        Intent snoozeIntent = new Intent(this, MemoOverviewActivity.class);
-        snoozeIntent.setAction("ACTION_SNOOZE");
-        snoozeIntent.putExtra("memoTitle", title);
-        PendingIntent piSnooze = PendingIntent.getService(this, 0, snoozeIntent, 0);
-
-        // Constructs the Builder object.
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle(title)
-                        .setContentText("location reached")
-                        .setAutoCancel(true)
-                        .setDefaults(Notification.DEFAULT_ALL)
-                        .addAction (R.drawable.ic_action_plus,
-                                "Snooze", piSnooze);
-
-
-        Intent resultIntent = new Intent(this, MemoOverviewActivity.class);
-        resultIntent.putExtra("memoTitle", title);
-        resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-        // Because clicking the notification opens a new ("special") activity, there's
-        // no need to create an artificial back stack.
-        PendingIntent resultPendingIntent =
-                PendingIntent.getActivity(
-                        this,
-                        0,
-                        resultIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-
-        builder.setContentIntent(resultPendingIntent);
-        //TODO UTILISER LID DU MEMO
-        mNotificationId++;
-        mNotificationManager.notify(mNotificationId, builder.build());
-
-    }
-
     public static void addAlarm(Alarm alarm){
         LAlarm.add(alarm);
     }
@@ -447,5 +403,6 @@ public class MainActivity extends AppCompatActivity
             launchMemoAlarms(memos.get(j).getTitle());
             j++;
         }
+        db.close();
     }
 }

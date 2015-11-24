@@ -32,7 +32,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-
+//TODO SI DECO EST CE QUE UN TAG EST MIS A CURRENT JE NE PENSE PAS !!!!!!!!!!!!!!!
 /**
  * A login screen that offers login via email/password.
  */
@@ -86,7 +86,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         db.close();
         if (current != null) {
             mEmailView.setText(current.getMail());
-            //TODO  TRUC TROP ZARB
             mPasswordView.setText(Connector.decrypt(Connector.decrypt(current.getPassword())));
             attemptLogin();
         }
@@ -283,12 +282,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 current.setGroup(Integer.parseInt(response));
                 current.setNom("");
                 current.setPrenom("");
-                //TODO connect DB + ADD USER IN DB + METTRE TAG CURRENT A TRUE
+
                 DBHelper db = new DBHelper(LoginActivity.this);
                 db.getWritableDatabase();
-                User exist = db.getUser(Integer.parseInt(response));
+                User exist = db.getUser(current.getId());
                 if(exist == null){
                     db.addUser(current);
+                }else{
+                    db.setCurrent(current.getId());
                 }
                 db.close();
                 return true;

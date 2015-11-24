@@ -168,16 +168,17 @@ public class AddMemoActivity extends AppCompatActivity
                 memo.setGroupId(0);
 
                 DBHelper db = new DBHelper(this);
+                db.getReadableDatabase();
                 if(isUpdate){
                     db.modifyAlarm(memo);
+                    db.close();
                     Intent save = new Intent(this, MainActivity.class);
                     save.putExtra("Title",memo.getTitle());
                     startActivity(save);
 
                 }else{
-                    if(db.addAlarm(memo))
-                    {
-                        //launchNotification();
+                    if(db.addAlarm(memo)) {
+                        db.close();
                         Intent save = new Intent(this, MainActivity.class);
                         save.putExtra("Title",memo.getTitle());
                         startActivity(save);
@@ -193,10 +194,13 @@ public class AddMemoActivity extends AppCompatActivity
 
                 return true;
             case R.id.action_deco:
-                //TODO METTRE LE TAG CURRENT A FALSE
 
-                    Intent intentLog = new Intent(this, LoginActivity.class);
-                    startActivity(intentLog);
+                DBHelper db1 = new DBHelper(this);
+                db1.getReadableDatabase();
+                db1.setCurrentToFalse();
+                db1.close();
+                Intent intentLog = new Intent(this, LoginActivity.class);
+                startActivity(intentLog);
 
                 return true;
 

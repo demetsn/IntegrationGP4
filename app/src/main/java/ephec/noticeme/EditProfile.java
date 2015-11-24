@@ -74,11 +74,8 @@ public class EditProfile extends AppCompatActivity {
 
         Connector connect = new Connector();
         if (!connect.connect("http://superpie.ddns.net:8035/app_dev.php/android/getuser")) {
-
             connect.disconnect();
-
         } else {
-
             String answer = connect.login(actualEmail, Connector.decrypt(Connector.decrypt(current.getPassword())));
             if (answer.equals('0')) {
                 connect.disconnect();
@@ -122,10 +119,8 @@ public class EditProfile extends AppCompatActivity {
                 }
                 db.close();
             }
-
             db.close();
 
-            //TODO Set les champs avec les valeurs enregistrées sur le serveur et aussi actualName,FirstName et Email.
             name.setText(actualName);
             firstname.setText(actualFisrtname);
             email.setText(actualEmail);
@@ -172,7 +167,13 @@ public class EditProfile extends AppCompatActivity {
                 email.setEnabled(false);
                 fab.setVisibility(View.VISIBLE);
                 return true;
-
+            case R.id.action_deco:
+                DBHelper db1 = new DBHelper(this);
+                db1.getReadableDatabase();
+                db1.setCurrentToFalse();
+                db1.close();
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
             default:
                 return super.onOptionsItemSelected(item);
         }

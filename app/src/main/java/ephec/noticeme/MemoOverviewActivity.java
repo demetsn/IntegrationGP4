@@ -103,7 +103,6 @@ public class MemoOverviewActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //TODO HANDLE DE DISCONNECT BUTTON
         switch (item.getItemId()) {
 
             case R.id.action_cancel:
@@ -121,7 +120,14 @@ public class MemoOverviewActivity extends AppCompatActivity {
 
                 return true;
 
-
+            case R.id.action_deco:
+                DBHelper db1 = new DBHelper(this);
+                db1.getReadableDatabase();
+                db1.setCurrentToFalse();
+                db1.close();
+                Intent intent = new Intent(this,LoginActivity.class);
+                startActivity(intent);
+                return true;
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.

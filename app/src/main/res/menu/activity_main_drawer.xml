@@ -8,14 +8,12 @@
             android:title="Add memo" />
         <item android:id="@+id/nav_maps" android:icon="@android:drawable/ic_menu_mapmode"
             android:title="Maps" />
-        <item android:id="@+id/nav_profile" android:icon="@drawable/ic_action_user"
-            android:title="Profile" />
     </group>
 
     <item android:title="Preferences">
         <menu>
         <item android:id="@+id/nav_edit" android:icon="@drawable/ic_edit"
-            android:title="Edit Profile" />
+            android:title="Profile" />
         </menu>
     </item>
 
