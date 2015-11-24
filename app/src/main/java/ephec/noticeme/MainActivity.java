@@ -334,7 +334,6 @@ public class MainActivity extends AppCompatActivity
 
     private void setProximityAlert(Alarm memo) {
 
-        //Intent intent = new Intent("ephec.noticeme"+memo.getTitle());
         Intent intent = new Intent(this, GeoReceiver.class);
 
         Toast.makeText(getApplicationContext(), "Création de l'intent dans setproximityalert "
@@ -434,6 +433,19 @@ public class MainActivity extends AppCompatActivity
             Intent intentAlarm = new Intent(getApplicationContext(),AlarmService.class);
             intentAlarm.putExtra("memoTitle", i.getExtras().getString("memoTitle"));
             startActivity(intentAlarm);
+        }
+    }
+
+    public void relaunchAlarms()
+    {
+        DBHelper db = new DBHelper(this.getApplicationContext());
+        db.getReadableDatabase();
+
+        ArrayList<Alarm> memos = db.getAllAlarm();
+        int j = 0;
+        while (memos.size() > j) {
+            launchMemoAlarms(memos.get(j).getTitle());
+            j++;
         }
     }
 }

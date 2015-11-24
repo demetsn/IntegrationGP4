@@ -380,12 +380,12 @@ public class DBHelper extends SQLiteOpenHelper
 
         ContentValues userValues = new ContentValues();
 
-        userValues.put(COlUMN_USER_ID, user.getId());
-        userValues.put(COLUMN_USER_GROUP_ID, user.getGroup());
+        //userValues.put(COlUMN_USER_ID, user.getId());
+        //userValues.put(COLUMN_USER_GROUP_ID, user.getGroup());
         userValues.put(COlUMN_USER_NAME, user.getNom());
         userValues.put(COLUMN_USER_FIRSTNAME, user.getPrenom());
         userValues.put(COlUMN_USER_EMAIL, user.getMail());
-        userValues.put(COLUMN_USER_PWD, user.getPassword());
+        //userValues.put(COLUMN_USER_PWD, user.getPassword());
         //userValues.put(COLUMN_ISCURRENT, 1);
 
         SQLiteDatabase db = this.getWritableDatabase();

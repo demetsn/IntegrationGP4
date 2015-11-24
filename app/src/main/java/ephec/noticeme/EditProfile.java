@@ -1,6 +1,7 @@
 package ephec.noticeme;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,6 +13,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class EditProfile extends AppCompatActivity {
 
@@ -41,15 +45,11 @@ public class EditProfile extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        //TODO Set les champs avec les valeurs enregistrées sur le serveur et aussi actualName,FirstName et Email.
         name = (EditText) findViewById(R.id.editProfileName);
-        name.setText(actualName);
-        name.setEnabled(false);
         firstname = (EditText) findViewById(R.id.editProfileFirstname);
-        firstname.setText(actualFisrtname);
-        firstname.setEnabled(false);
         email = (EditText) findViewById(R.id.editProfileEmail);
-        email.setText(actualEmail);
+        name.setEnabled(false);
+        firstname.setEnabled(false);
         email.setEnabled(false);
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -63,6 +63,73 @@ public class EditProfile extends AppCompatActivity {
             }
         });
 
+        DBHelper db = new DBHelper(this.getApplicationContext());
+        db.getReadableDatabase();
+
+        User current = db.getCurrentUSer();
+
+        actualName = current.getNom();
+        actualFisrtname = current.getPrenom();
+        actualEmail = current.getMail();
+
+        Connector connect = new Connector();
+        if (!connect.connect("http://superpie.ddns.net:8035/app_dev.php/android/getuser")) {
+
+            connect.disconnect();
+
+        } else {
+
+            String answer = connect.login(actualEmail, Connector.decrypt(Connector.decrypt(current.getPassword())));
+            if (answer.equals('0')) {
+                connect.disconnect();
+                db.setCurrentToFalse();
+                db.close();
+                Intent disconnect = new Intent(this, LoginActivity.class);
+                startActivity(disconnect);
+                return;
+            } else {
+                answer = android.text.Html.fromHtml(answer).toString();
+                //System.out.println("responce : "+response);
+                //DBHelper db = new DBHelper(context);
+                //db.getWritableDatabase();
+                try {
+                    JSONObject obj = new JSONObject(answer);
+                    JSONArray jArray = obj.getJSONArray("json");
+                    for (int i = 0; i < jArray.length(); i++) {
+                        try {
+                            JSONObject oneObject = jArray.getJSONObject(i);
+
+                            actualName = oneObject.getString("lastname");
+                            actualFisrtname = oneObject.getString("firstname");
+                            int id = current.getId();
+                            User usr = new User();
+                            usr.setId(id);
+                            usr.setNom(actualName);
+                            usr.setPrenom(actualFisrtname);
+                            usr.setMail(actualEmail);
+
+                            db.modifyUser(usr);
+
+                        } catch (SQLiteConstraintException e) {
+
+                        }
+                    }
+                } catch (Exception e) {
+                    //TODO AFFICHER TOAST ERREUR CO SERVER
+                    db.close();
+                    connect.disconnect();
+                    return;
+                }
+                db.close();
+            }
+
+            db.close();
+
+            //TODO Set les champs avec les valeurs enregistrées sur le serveur et aussi actualName,FirstName et Email.
+            name.setText(actualName);
+            firstname.setText(actualFisrtname);
+            email.setText(actualEmail);
+        }
     }
 
     @Override
@@ -111,3 +178,4 @@ public class EditProfile extends AppCompatActivity {
         }
     }
 }
+
