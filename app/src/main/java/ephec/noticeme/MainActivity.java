@@ -233,7 +233,8 @@ public class MainActivity extends AppCompatActivity
         if(id == R.id.action_deco){
             DBHelper db1 = new DBHelper(this);
             db1.getReadableDatabase();
-            db1.setCurrentToFalse();
+            User usr = db1.getCurrentUSer();
+            db1.setCurrentToFalse(usr);
             db1.close();
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);

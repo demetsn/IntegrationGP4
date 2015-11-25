@@ -72,6 +72,72 @@ public class Connector {
         }
         return response;
     }
+    public String addMemo(String mEmail, String mPassword, Alarm memo){
+        String response = "";
+        try{
+            String crypted = encrypt(mPassword);
+            Uri.Builder builder = new Uri.Builder().appendQueryParameter("username",mEmail)
+                    .appendQueryParameter("password", crypted)
+                    .appendQueryParameter("title",memo.getTitle())
+                    .appendQueryParameter("description",memo.getDescription())
+                    .appendQueryParameter("date",""+memo.getAlarmDate())
+                    .appendQueryParameter("latitude",""+memo.getLatitude())
+                    .appendQueryParameter("longitude",""+memo.getLongitude());
+            String query = builder.build().getEncodedQuery();
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,"UTF-8"));
+            writer.write(query);
+            writer.flush();
+            writer.close();
+            os.close();
+            InputStream inputStream = conn.getInputStream();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"UTF-8"));
+
+            String line = "";
+            while ((line = bufferedReader.readLine())!=null){
+                response+= line;
+            }
+            bufferedReader.close();
+            inputStream.close();
+        }catch (Exception e){
+
+            e.printStackTrace();
+            return "ERROR";
+        }
+        return response;
+    }
+    public String editUser(String mEmail, String mPassword, User usr){
+        String response = "";
+        try{
+            String crypted = encrypt(mPassword);
+            Uri.Builder builder = new Uri.Builder().appendQueryParameter("username",mEmail)
+                    .appendQueryParameter("password", crypted)
+                    .appendQueryParameter("mail",usr.getMail())
+                    .appendQueryParameter("firstname",usr.getPrenom())
+                    .appendQueryParameter("lastname",""+usr.getNom());
+            String query = builder.build().getEncodedQuery();
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,"UTF-8"));
+            writer.write(query);
+            writer.flush();
+            writer.close();
+            os.close();
+            InputStream inputStream = conn.getInputStream();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"UTF-8"));
+
+            String line = "";
+            while ((line = bufferedReader.readLine())!=null){
+                response+= line;
+            }
+            bufferedReader.close();
+            inputStream.close();
+        }catch (Exception e){
+
+            e.printStackTrace();
+            return "ERROR";
+        }
+        return response;
+    }
 
     public boolean disconnect(){
         try{

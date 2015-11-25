@@ -242,7 +242,7 @@ public class MemoList extends Fragment {
         @Override
         protected Boolean doInBackground(Void... params) {
             Connector co = new Connector();
-            if(!co.connect("http://superpie.ddns.net:8035/app_dev.php/android/memolist")) return false;
+            if(!co.connect("http://ephecnoticeme.me/app.php/android/memolist")) return false;
             String mail = "";
             String pass = "";
             DBHelper db1 = new DBHelper(context);

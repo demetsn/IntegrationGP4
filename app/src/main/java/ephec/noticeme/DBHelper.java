@@ -293,7 +293,7 @@ public class DBHelper extends SQLiteOpenHelper
 
         if (cursor.moveToFirst()) {
             alarm.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_ID))));
-            db.delete(TABLE_ALARMS, COlUMN_ID + " = ",
+            db.delete(TABLE_ALARMS, COlUMN_ID + " = ?",
                     new String[]{String.valueOf(alarm.getId())});
             cursor.close();
             result = true;
@@ -316,7 +316,7 @@ public class DBHelper extends SQLiteOpenHelper
 
         if (cursor.moveToFirst()) {
             alarm.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_ID))));
-            db.delete(TABLE_ALARMS, COlUMN_ID + " = ",
+            db.delete(TABLE_ALARMS, COlUMN_ID + " = ?",
                     new String[]{String.valueOf(alarm.getId())});
             cursor.close();
             result = true;
@@ -340,7 +340,7 @@ public class DBHelper extends SQLiteOpenHelper
         if (cursor.moveToFirst())
         {
             user.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_USER_ID))));
-            db.delete(TABLE_USERS, COlUMN_USER_ID + " = ",
+            db.delete(TABLE_USERS, COlUMN_USER_ID + " = ?",
                     new String[]{String.valueOf(user.getId())});
             cursor.close();
             result = true;
@@ -366,8 +366,9 @@ public class DBHelper extends SQLiteOpenHelper
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.update(TABLE_ALARMS, values, COlUMN_ID + "= \"" + alarm.getId()+"\"", null);
+        db.update(TABLE_ALARMS, values, COlUMN_ID + "= \"" + alarm.getId() + "\"", null);
 
+        db.close();
         result = true;
         return result;
     }
@@ -397,52 +398,42 @@ public class DBHelper extends SQLiteOpenHelper
         return result;
     }
 
-    public boolean setCurrentToFalse(){
-
-        boolean result = false;
-
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        User current = getCurrentUSer();
+    public boolean setCurrentToFalse(User current){
 
         ContentValues userValues = new ContentValues();
 
-        userValues.put(COlUMN_USER_ID, current.getId());
-        userValues.put(COLUMN_USER_GROUP_ID, current.getGroup());
-        userValues.put(COlUMN_USER_NAME, current.getNom());
-        userValues.put(COLUMN_USER_FIRSTNAME, current.getPrenom());
-        userValues.put(COlUMN_USER_EMAIL, current.getMail());
-        userValues.put(COLUMN_USER_PWD, current.getPassword());
+        //userValues.put(COlUMN_USER_ID, current.getId());
+        //userValues.put(COLUMN_USER_GROUP_ID, current.getGroup());
+        //userValues.put(COlUMN_USER_NAME, current.getNom());
+        //userValues.put(COLUMN_USER_FIRSTNAME, current.getPrenom());
+        //userValues.put(COlUMN_USER_EMAIL, current.getMail());
+        //userValues.put(COLUMN_USER_PWD, current.getPassword());
         userValues.put(COLUMN_ISCURRENT, 0);
 
-        db.update(TABLE_USERS, userValues, COlUMN_USER_ID + " = \"" + current.getId()+"\"", null);
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.update(TABLE_USERS, userValues, COlUMN_USER_ID + " = \"" + current.getId() + "\"", null);
 
         db.close();
 
-        result = true;
-
-        return result;
+        return true;
     }
 
     public boolean setCurrent(int id){
 
         boolean result = false;
 
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        User current = getUser(id);
-
         ContentValues userValues = new ContentValues();
 
-        userValues.put(COlUMN_USER_ID, current.getId());
-        userValues.put(COLUMN_USER_GROUP_ID, current.getGroup());
-        userValues.put(COlUMN_USER_NAME, current.getNom());
-        userValues.put(COLUMN_USER_FIRSTNAME, current.getPrenom());
-        userValues.put(COlUMN_USER_EMAIL, current.getMail());
-        userValues.put(COLUMN_USER_PWD, current.getPassword());
+        //userValues.put(COlUMN_USER_ID, current.getId());
+        //userValues.put(COLUMN_USER_GROUP_ID, current.getGroup());
+        //userValues.put(COlUMN_USER_NAME, current.getNom());
+        //userValues.put(COLUMN_USER_FIRSTNAME, current.getPrenom());
+        //userValues.put(COlUMN_USER_EMAIL, current.getMail());
+        //userValues.put(COLUMN_USER_PWD, current.getPassword());
         userValues.put(COLUMN_ISCURRENT, 1);
 
-        db.update(TABLE_USERS, userValues, COlUMN_USER_ID + " = \"" + current.getId()+"\"", null);
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.update(TABLE_USERS, userValues, COlUMN_USER_ID + " = \"" + id+"\"", null);
 
         db.close();
 

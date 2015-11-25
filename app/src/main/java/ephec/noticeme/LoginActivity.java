@@ -266,7 +266,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             Connector co = new Connector();
-            if(!co.connect("http://superpie.ddns.net:8035/app_dev.php/android/login")) return false;
+            if(!co.connect("http://ephecnoticeme.me/app.php/android/login")) return false;
             System.out.println("connected");
             String response = co.login(mEmail,mPassword);
             System.out.println("logged");
@@ -289,7 +289,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 if(exist == null){
                     db.addUser(current);
                 }else{
-                    db.setCurrent(current.getId());
+                    if(db.getCurrentUSer() == null){
+                        db.setCurrent(current.getId());
+                    }
                 }
                 db.close();
                 return true;

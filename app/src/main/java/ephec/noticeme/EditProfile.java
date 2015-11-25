@@ -1,7 +1,9 @@
 package ephec.noticeme;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteConstraintException;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -22,16 +24,14 @@ public class EditProfile extends AppCompatActivity {
     private EditText name;
     private EditText firstname;
     private EditText email;
+    private User current;
+    private User modifUser;
 
     private FloatingActionButton fab;
 
-    private String actualName = "Dekeyser";
-    private String actualFisrtname = "Olivier";
-    private String actualEmail = "Dksrolivier@gmail.com";
-
-    private String newName;
-    private String newFirstname;
-    private String newEmail;
+    private String actualName = "";
+    private String actualFisrtname = "";
+    private String actualEmail = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,66 +65,15 @@ public class EditProfile extends AppCompatActivity {
 
         DBHelper db = new DBHelper(this.getApplicationContext());
         db.getReadableDatabase();
-
-        User current = db.getCurrentUSer();
+        current = db.getCurrentUSer();
+        db.close();
 
         actualName = current.getNom();
         actualFisrtname = current.getPrenom();
         actualEmail = current.getMail();
 
-        Connector connect = new Connector();
-        if (!connect.connect("http://superpie.ddns.net:8035/app_dev.php/android/getuser")) {
-            connect.disconnect();
-        } else {
-            String answer = connect.login(actualEmail, Connector.decrypt(Connector.decrypt(current.getPassword())));
-            if (answer.equals('0')) {
-                connect.disconnect();
-                db.setCurrentToFalse();
-                db.close();
-                Intent disconnect = new Intent(this, LoginActivity.class);
-                startActivity(disconnect);
-                return;
-            } else {
-                answer = android.text.Html.fromHtml(answer).toString();
-                //System.out.println("responce : "+response);
-                //DBHelper db = new DBHelper(context);
-                //db.getWritableDatabase();
-                try {
-                    JSONObject obj = new JSONObject(answer);
-                    JSONArray jArray = obj.getJSONArray("json");
-                    for (int i = 0; i < jArray.length(); i++) {
-                        try {
-                            JSONObject oneObject = jArray.getJSONObject(i);
-
-                            actualName = oneObject.getString("lastname");
-                            actualFisrtname = oneObject.getString("firstname");
-                            int id = current.getId();
-                            User usr = new User();
-                            usr.setId(id);
-                            usr.setNom(actualName);
-                            usr.setPrenom(actualFisrtname);
-                            usr.setMail(actualEmail);
-
-                            db.modifyUser(usr);
-
-                        } catch (SQLiteConstraintException e) {
-
-                        }
-                    }
-                } catch (Exception e) {
-                    //TODO AFFICHER TOAST ERREUR CO SERVER
-                    db.close();
-                    connect.disconnect();
-                    return;
-                }
-                db.close();
-            }
-            db.close();
-
-            name.setText(actualName);
-            firstname.setText(actualFisrtname);
-            email.setText(actualEmail);
-        }
+        EditProfileTask task = new EditProfileTask(this,false);
+        task.execute((Void)null);
     }
 
     @Override
@@ -142,19 +91,11 @@ public class EditProfile extends AppCompatActivity {
                 return true;
 
             case R.id.action_done:
-                /*TODO Valide le changement de profil il faut faire une connexion au serveur pour qu'il enregistre les modifications.
-                *Il faudra faire un if else en fonction de la réponse du serveur. True, on retourne sur mainactivity
-                *False on reste et on remet les champs non éditables avec les anciennes valeurs.
-                *Enregistrer les nouvelles valeurs dans newName,Firstname et Email.*/
-                boolean newProfileValidated = false;
-
-                if (newProfileValidated) {
-                    Intent returnToMain = new Intent(this, MainActivity.class);
-                    startActivity(returnToMain);
-                } else {
-                    name.setError("Enable to connect. Please try again.");
-                    name.requestFocus();
-                }
+                modifUser = new User();
+                modifUser.setMail(email.getText().toString());
+                modifUser.setNom(name.getText().toString());
+                modifUser.setPrenom(firstname.getText().toString());
+                //TODO ASYNCTASK
                 return true;
 
             case R.id.action_cancel:
@@ -170,12 +111,105 @@ public class EditProfile extends AppCompatActivity {
             case R.id.action_deco:
                 DBHelper db1 = new DBHelper(this);
                 db1.getReadableDatabase();
-                db1.setCurrentToFalse();
+                User usr = db1.getCurrentUSer();
+                db1.setCurrentToFalse(usr);
                 db1.close();
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+    private class EditProfileTask extends AsyncTask<Void, Void, Boolean> {
+        private Context context;
+        private boolean isEdit;
+
+        EditProfileTask(Context context, boolean isEdit) {
+            this.context = context;
+            this.isEdit = isEdit;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            Connector connect = new Connector();
+            DBHelper db = new DBHelper(context);
+            db.getWritableDatabase();
+            if(isEdit){
+                connect.connect("http://ephecnoticeme.me/app.php/android/edituser");
+                String response = connect.editUser(actualEmail,Connector.decrypt(Connector.decrypt(current.getPassword())),modifUser);
+                if(response.equals("0")){
+                    connect.disconnect();
+                    db.setCurrentToFalse(current);
+                    db.close();
+                    return false;
+                }
+                return true;
+
+            }else{
+                if (!connect.connect("http://ephecnoticeme.me/app.php/android/getuser")) {
+                    connect.disconnect();
+                } else {
+                    String answer = connect.login(actualEmail, Connector.decrypt(Connector.decrypt(current.getPassword())));
+                    if (answer.equals("0")) {
+                        connect.disconnect();
+                        db.setCurrentToFalse(current);
+                        db.close();
+                        return false;
+                    } else {
+                        answer = android.text.Html.fromHtml(answer).toString();
+                        //System.out.println("responce : "+response);
+                        //DBHelper db = new DBHelper(context);
+                        //db.getWritableDatabase();
+                        try {
+                            JSONObject obj = new JSONObject(answer);
+                            JSONArray jArray = obj.getJSONArray("json");
+                            for (int i = 0; i < jArray.length(); i++) {
+                                try {
+                                    JSONObject oneObject = jArray.getJSONObject(i);
+
+                                    actualName = oneObject.getString("lastname");
+                                    actualFisrtname = oneObject.getString("firstname");
+                                    int id = current.getId();
+                                    User usr = new User();
+                                    usr.setId(id);
+                                    usr.setNom(actualName);
+                                    usr.setPrenom(actualFisrtname);
+                                    usr.setMail(actualEmail);
+
+                                    db.modifyUser(usr);
+
+                                } catch (SQLiteConstraintException e) {
+
+                                }
+                            }
+                        } catch (Exception e) {
+                            db.setCurrentToFalse(current);
+                            db.close();
+                            connect.disconnect();
+                            return false;
+                        }
+                        db.close();
+                    }
+                }
+            }
+            return true;
+        }
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if (success) {
+                if(isEdit){
+                    Intent intent= new Intent(context,MainActivity.class);
+                    startActivity(intent);
+                }else{
+                    name.setText(actualName);
+                    firstname.setText(actualFisrtname);
+                    email.setText(actualEmail);
+                }
+
+            } else {
+                Intent disconnect = new Intent(context, LoginActivity.class);
+                startActivity(disconnect);
+            }
         }
     }
 }

@@ -160,15 +160,28 @@ public class AddMemoActivity extends AppCompatActivity
                 memo.setLongitude(mMarker.getPosition().longitude);
 
                 if(!isUpdate){
-                    Random rn1 = new Random();
-                    memo.setId(rn1.nextInt(10000));
+                    //ID A -1 pour le server
+                    memo.setId(-1);
                 }else{
                     memo.setId(this.id);
                 }
-                memo.setGroupId(0);
-
+                Connector connect = new Connector();
+                connect.connect("http://ephecnoticeme.me/app.php/android/editmemo");
                 DBHelper db = new DBHelper(this);
-                db.getReadableDatabase();
+                db.getWritableDatabase();
+                User current = db.getCurrentUSer();
+                String response = connect.addMemo(current.getMail(),Connector.decrypt(Connector.decrypt(current.getPassword())),memo);
+                if(response.equals("0")){
+                    connect.disconnect();
+                    db.setCurrentToFalse(current);
+                    db.close();
+                    Intent disconnect = new Intent(this, LoginActivity.class);
+                    startActivity(disconnect);
+                    return true;
+                }
+                memo.setId(Integer.parseInt(response));
+                connect.disconnect();
+
                 if(isUpdate){
                     db.modifyAlarm(memo);
                     db.close();
@@ -197,7 +210,8 @@ public class AddMemoActivity extends AppCompatActivity
 
                 DBHelper db1 = new DBHelper(this);
                 db1.getReadableDatabase();
-                db1.setCurrentToFalse();
+                User usr = db1.getCurrentUSer();
+                db1.setCurrentToFalse(usr);
                 db1.close();
                 Intent intentLog = new Intent(this, LoginActivity.class);
                 startActivity(intentLog);
