@@ -63,6 +63,10 @@ public class MemoList extends Fragment {
         Bundle extras = getArguments();
         if(extras != null){
             if(extras.containsKey("sync")){
+                DBHelper db = new DBHelper(getContext());
+                db.getWritableDatabase();
+                db.deleteAllAlarm();
+                db.close();
                 FillMemoTask syncTask = new FillMemoTask(getActivity());
                 syncTask.execute((Void) null);
             }
@@ -83,8 +87,6 @@ public class MemoList extends Fragment {
 
         DBHelper db = new DBHelper(getActivity());
         db.getWritableDatabase();
-        User usr = db.getCurrentUSer();
-        db.close();
         ArrayList<Alarm> memos = db.getAllAlarm();
         Iterator<Alarm> it = memos.iterator();
         while(it.hasNext()){
@@ -252,19 +254,15 @@ public class MemoList extends Fragment {
             pass = Connector.decrypt(Connector.decrypt(usr.getPassword()));
             System.out.println(mail);
             System.out.println(pass);
-            db1.close();
+
             String response = co.login(mail,pass);
             System.out.println("reponse : "+response);
             if(response.equals("0")){
-                try{
-                    //TODO AFFICHER UN TOAST QUI PREVIENT DE LA DECO
-                    Thread.sleep(2000);
-                }catch (Exception e){
-
-                }
+                db1.setCurrentToFalse(usr);
+                db1.close();
                 co.disconnect();
-                //Intent intent = new Intent(context, LoginActivity.class);
-                //startActivity(intent);
+                Intent intent = new Intent(context, LoginActivity.class);
+                startActivity(intent);
                 System.out.println("Je suis ici mais le log est ok");
                 return false;
             }else{

@@ -168,13 +168,13 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if(id == R.id.action_refresh){
-            Intent intent = new Intent(this,MainActivity.class);
+            //TODO handle this button
+            /*Intent intent = new Intent(this,LoginActivity.class);
             intent.putExtra("sync","sync");
-            startActivity(intent);
+            startActivity(intent);*/
             return true;
         }
         if(id == R.id.action_delete){
-            //TODO FAIRE UNE ASYNCTASK
             DBHelper db = new DBHelper(this);
             db.getWritableDatabase();
             User usr = db.getCurrentUSer();

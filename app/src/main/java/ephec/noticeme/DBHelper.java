@@ -279,27 +279,27 @@ public class DBHelper extends SQLiteOpenHelper
         return alarms;
     }
 
-    public boolean deleteAlarm(int id) {
-
+    public boolean deleteAllAlarm() {
         boolean result = false;
 
-        String query = "Select * FROM " + TABLE_ALARMS + " WHERE " + COlUMN_ID + " =  \"" + id + "\"";
+        String query = "Select * FROM " + TABLE_ALARMS;
+
 
         SQLiteDatabase db = this.getWritableDatabase();
 
         Cursor cursor = db.rawQuery(query, null);
-
         Alarm alarm = new Alarm();
 
         if (cursor.moveToFirst()) {
-            alarm.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_ID))));
-            db.delete(TABLE_ALARMS, COlUMN_ID + " = ?",
-                    new String[]{String.valueOf(alarm.getId())});
-            cursor.close();
-            result = true;
+            while (cursor.isAfterLast() == false) {
+                alarm.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_ID))));
+                db.delete(TABLE_ALARMS, COlUMN_ID + " = ?",
+                        new String[]{String.valueOf(alarm.getId())});
+            }
         }
-        db.close();
-        return result;
+        cursor.close();
+
+        return true;
     }
 
     public boolean deleteAlarm(String title) {
@@ -361,12 +361,12 @@ public class DBHelper extends SQLiteOpenHelper
         values.put(COLUMN_TITLE, alarm.getTitle());
         values.put(COLUMN_DESCRIPTION, alarm.getDescription());
         values.put(COLUMN_LATITUDE, alarm.getLatitude());
-        values.put(COLUMN_LONGITUDE, alarm.getLongitude());
+            values.put(COLUMN_LONGITUDE, alarm.getLongitude());
         values.put(COLUMN_ALARM_DATE, alarm.getAlarmDate());
 
-        SQLiteDatabase db = this.getWritableDatabase();
+            SQLiteDatabase db = this.getWritableDatabase();
 
-        db.update(TABLE_ALARMS, values, COlUMN_ID + "= \"" + alarm.getId() + "\"", null);
+            db.update(TABLE_ALARMS, values, COlUMN_ID + "= \"" + alarm.getId() + "\"", null);
 
         result = true;
         return result;
