@@ -28,7 +28,7 @@ public class EditProfile extends AppCompatActivity {
     private User modifUser;
 
     private FloatingActionButton fab;
-
+    private static int compteur = 0;
     private String actualName = "";
     private String actualFisrtname = "";
     private String actualEmail = "";
@@ -72,8 +72,11 @@ public class EditProfile extends AppCompatActivity {
         actualFisrtname = current.getPrenom();
         actualEmail = current.getMail();
 
-        EditProfileTask task = new EditProfileTask(this,false);
-        task.execute((Void)null);
+        if(compteur==0){
+            EditProfileTask task = new EditProfileTask(this,false);
+            task.execute((Void)null);
+        }
+
     }
 
     @Override
@@ -157,7 +160,7 @@ public class EditProfile extends AppCompatActivity {
                         return false;
                     } else {
                         answer = android.text.Html.fromHtml(answer).toString();
-                        //System.out.println("responce : "+response);
+                        System.out.println("responce : "+answer);
                         //DBHelper db = new DBHelper(context);
                         //db.getWritableDatabase();
                         try {
@@ -204,6 +207,7 @@ public class EditProfile extends AppCompatActivity {
                     name.setText(actualName);
                     firstname.setText(actualFisrtname);
                     email.setText(actualEmail);
+                    finish();
                 }
 
             } else {

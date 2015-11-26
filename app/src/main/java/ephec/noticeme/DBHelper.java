@@ -245,9 +245,9 @@ public class DBHelper extends SQLiteOpenHelper
         return alarm;
     }
 
-    public ArrayList<Alarm> getAllAlarm(){
+    public ArrayList<Alarm> getAllAlarm(int id){
 
-        String query = "Select * FROM " + TABLE_ALARMS + " ORDER BY "+COLUMN_ALARM_DATE+" ASC";
+        String query = "Select * FROM " + TABLE_ALARMS  +" ORDER BY "+COLUMN_ALARM_DATE+" ASC";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, null);
 
@@ -433,7 +433,7 @@ public class DBHelper extends SQLiteOpenHelper
         userValues.put(COLUMN_ISCURRENT, 1);
 
         SQLiteDatabase db = this.getWritableDatabase();
-        db.update(TABLE_USERS, userValues, COlUMN_USER_ID + " = \"" + id+"\"", null);
+        db.update(TABLE_USERS, userValues, COlUMN_USER_ID + " = \"" + id+"\"",null);
 
         db.close();
 

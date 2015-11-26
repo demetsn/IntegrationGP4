@@ -47,6 +47,7 @@ public class Connector {
         String response = "";
         try{
             String crypted = encrypt(mPassword);
+            System.out.println("PASS : "+crypted);
             Uri.Builder builder = new Uri.Builder().appendQueryParameter("username",mEmail)
                     .appendQueryParameter("password",crypted);
             String query = builder.build().getEncodedQuery();
@@ -72,6 +73,37 @@ public class Connector {
         }
         return response;
     }
+    public String delMemo(String mEmail, String mPassword, int id){
+        String response= "";
+        try{
+            String crypted = encrypt(mPassword);
+            System.out.println("PASS : "+crypted);
+            Uri.Builder builder = new Uri.Builder().appendQueryParameter("username",mEmail)
+                    .appendQueryParameter("password",crypted)
+                    .appendQueryParameter("id",""+id);
+            String query = builder.build().getEncodedQuery();
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,"UTF-8"));
+            writer.write(query);
+            writer.flush();
+            writer.close();
+            os.close();
+            InputStream inputStream = conn.getInputStream();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"UTF-8"));
+
+            String line = "";
+            while ((line = bufferedReader.readLine())!=null){
+                response+= line;
+            }
+            bufferedReader.close();
+            inputStream.close();
+        }catch (Exception e){
+
+            e.printStackTrace();
+            return "ERROR";
+        }
+        return  response;
+    }
     public String addMemo(String mEmail, String mPassword, Alarm memo){
         String response = "";
         try{
@@ -82,7 +114,9 @@ public class Connector {
                     .appendQueryParameter("description",memo.getDescription())
                     .appendQueryParameter("date",""+memo.getAlarmDate())
                     .appendQueryParameter("latitude",""+memo.getLatitude())
-                    .appendQueryParameter("longitude",""+memo.getLongitude());
+                    .appendQueryParameter("longitude",""+memo.getLongitude())
+                    .appendQueryParameter("idmemo", "" + memo.getId());
+
             String query = builder.build().getEncodedQuery();
             OutputStream os = conn.getOutputStream();
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,"UTF-8"));

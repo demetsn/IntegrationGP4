@@ -15,6 +15,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -58,9 +59,8 @@ public class MainActivity extends AppCompatActivity
     private float radius = 50;
     private static ArrayList<Alarm> LAlarm ;
     private static ArrayList<Alarm> AlarmToRestore;
-    private static int mNotificationId = 0;
     private LocationManager locManager;
-    private LocationListener locListener;
+    private RemoveTask mAuthTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,26 +184,13 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         if(id == R.id.action_delete){
-            DBHelper db = new DBHelper(this.getApplicationContext());
-            db.getReadableDatabase();
-            AlarmToRestore = new ArrayList<>();
-
-            Iterator<Alarm> it = LAlarm.iterator();
-            while(it.hasNext()){
-                Alarm temp = it.next();
-                AlarmToRestore.add(temp);
-                db.deleteAlarm(temp.getTitle());
-                //MemoList.hideAlarm(temp);
-            }
-            db.close();
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            Fragment newFragment = new MemoList();
-            toolbar.setTitle("Memo List");
-            itemMenu.setVisible(true);
-            transaction.replace(R.id.fragment_container, newFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-            if(!AlarmToRestore.isEmpty()){
+            //TODO FAIRE UNE ASYNCTASK
+            DBHelper db = new DBHelper(this);
+            db.getWritableDatabase();
+            User usr = db.getCurrentUSer();
+            mAuthTask = new RemoveTask(usr.getMail(),Connector.decrypt(Connector.decrypt(usr.getPassword())));
+            mAuthTask.execute((Void)null);
+            /*if(!AlarmToRestore.isEmpty()){
                 Snackbar.make(
                         findViewById(android.R.id.content),
                         "Selected item deleted",
@@ -227,7 +214,7 @@ public class MainActivity extends AppCompatActivity
 
                             }
                         }).show();
-            }
+            }*/
             return true;
         }
         if(id == R.id.action_deco){
@@ -336,11 +323,6 @@ public class MainActivity extends AppCompatActivity
 
         Intent intent = new Intent(this, GeoReceiver.class);
 
-        Toast.makeText(getApplicationContext(), "Création de l'intent dans setproximityalert "
-                +memo.getTitle()+" ID du memo "+memo.getId()
-                + " lat : "+memo.getLatitude()
-                + " long : "+memo.getLongitude(), Toast.LENGTH_LONG).show();
-
         intent.putExtra("memoTitle", memo.getTitle());
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -362,7 +344,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onLocationChanged(Location location) {
-            Toast.makeText(getApplicationContext(), "lat : " + location.getLatitude()+ " long : "+location.getLongitude(), Toast.LENGTH_LONG).show();
+
         }
 
         @Override
@@ -386,15 +368,13 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context c, Intent i) {
 
-            Toast.makeText(getApplicationContext(), "Launching Notification " + i.getExtras().getString("memoTitle"), Toast.LENGTH_LONG).show();
             Intent intentAlarm = new Intent(getApplicationContext(),AlarmService.class);
             intentAlarm.putExtra("memoTitle", i.getExtras().getString("memoTitle"));
             startActivity(intentAlarm);
         }
     }
 
-    public void relaunchAlarms()
-    {
+    public void relaunchAlarms() {
         DBHelper db = new DBHelper(this.getApplicationContext());
         db.getReadableDatabase();
 
@@ -405,5 +385,57 @@ public class MainActivity extends AppCompatActivity
             j++;
         }
         db.close();
+    }
+
+    public class RemoveTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String mEmail;
+        private final String mPassword;
+
+        RemoveTask(String email, String password) {
+            mEmail = email;
+            mPassword = password;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            DBHelper db = new DBHelper(MainActivity.this);
+            db.getReadableDatabase();
+            AlarmToRestore = new ArrayList<>();
+            Iterator<Alarm> it = LAlarm.iterator();
+            while(it.hasNext()){
+                Connector co = new Connector();
+                if(!co.connect("http://ephecnoticeme.me/app.php/android/removememo")) return false;
+                Alarm temp = it.next();
+                AlarmToRestore.add(temp);
+                String response = co.delMemo(mEmail,mPassword,temp.getId());
+                if(response.equals("ERROR")) return false;
+                if(response.equals("0")){
+                    System.out.println("Error Login");
+                    return false;
+                }
+                if(!co.disconnect()) return false;
+                db.deleteAlarm(temp.getTitle());
+            }
+            db.close();
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mAuthTask = null;
+
+            if (success) {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                Fragment newFragment = new MemoList();
+                //toolbar.setTitle("Memo List");
+                itemMenu.setVisible(true);
+                transaction.replace(R.id.fragment_container, newFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            } else {
+                Toast.makeText(MainActivity.this,"error during suppression",Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }

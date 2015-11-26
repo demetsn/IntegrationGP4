@@ -85,9 +85,9 @@ public class MemoList extends Fragment {
 
         DBHelper db = new DBHelper(getActivity());
         db.getWritableDatabase();
-
+        User usr = db.getCurrentUSer();
         db.close();
-        ArrayList<Alarm> memos = db.getAllAlarm();
+        ArrayList<Alarm> memos = db.getAllAlarm(usr.getId());
         Iterator<Alarm> it = memos.iterator();
         while(it.hasNext()){
             Alarm temp = it.next();
@@ -232,6 +232,8 @@ public class MemoList extends Fragment {
             this.isChecked = isChecked;
         }
     }
+
+
     private class FillMemoTask extends AsyncTask<Void, Void, Boolean> {
         private Context context;
 

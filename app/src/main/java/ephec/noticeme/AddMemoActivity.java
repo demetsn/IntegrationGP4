@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -57,6 +59,7 @@ public class AddMemoActivity extends AppCompatActivity
     private static int markerCount;
     private boolean isUpdate;
     private int id;
+    private AddTask mAuthTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,39 +168,13 @@ public class AddMemoActivity extends AppCompatActivity
                 }else{
                     memo.setId(this.id);
                 }
-                Connector connect = new Connector();
-                connect.connect("http://ephecnoticeme.me/app.php/android/editmemo");
+                //TODO ASYNCTASK
                 DBHelper db = new DBHelper(this);
                 db.getWritableDatabase();
-                User current = db.getCurrentUSer();
-                String response = connect.addMemo(current.getMail(),Connector.decrypt(Connector.decrypt(current.getPassword())),memo);
-                if(response.equals("0")){
-                    connect.disconnect();
-                    db.setCurrentToFalse(current);
-                    db.close();
-                    Intent disconnect = new Intent(this, LoginActivity.class);
-                    startActivity(disconnect);
-                    return true;
-                }
-                memo.setId(Integer.parseInt(response));
-                connect.disconnect();
-
-                if(isUpdate){
-                    db.modifyAlarm(memo);
-                    db.close();
-                    Intent save = new Intent(this, MainActivity.class);
-                    save.putExtra("Title",memo.getTitle());
-                    startActivity(save);
-
-                }else{
-                    if(db.addAlarm(memo)) {
-                        db.close();
-                        Intent save = new Intent(this, MainActivity.class);
-                        save.putExtra("Title",memo.getTitle());
-                        startActivity(save);
-                    }
-                }
-
+                User usr = db.getCurrentUSer();
+                mAuthTask = new AddTask(usr.getMail(),Connector.decrypt(Connector.decrypt(usr.getPassword())),memo);
+                mAuthTask.execute((Void)null);
+                db.close();
 
                 return true;
             case R.id.action_cancel:
@@ -210,8 +187,8 @@ public class AddMemoActivity extends AppCompatActivity
 
                 DBHelper db1 = new DBHelper(this);
                 db1.getReadableDatabase();
-                User usr = db1.getCurrentUSer();
-                db1.setCurrentToFalse(usr);
+                User current = db1.getCurrentUSer();
+                db1.setCurrentToFalse(current);
                 db1.close();
                 Intent intentLog = new Intent(this, LoginActivity.class);
                 startActivity(intentLog);
@@ -355,5 +332,73 @@ public class AddMemoActivity extends AppCompatActivity
         now = thisYear+"/"+thisMonth+"/"+today+"&"+thisHour+":"+thisMinute;
 
         return now;
+    }
+
+    public class AddTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String mEmail;
+        private final String mPassword;
+        private Alarm memo;
+
+        AddTask(String email, String password, Alarm memo) {
+            mEmail = email;
+            mPassword = password;
+            this.memo = memo;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            Connector connect = new Connector();
+            connect.connect("http://ephecnoticeme.me/app.php/android/editmemo");
+            DBHelper db = new DBHelper(AddMemoActivity.this);
+            db.getWritableDatabase();
+            User current = db.getCurrentUSer();
+            String response = connect.addMemo(mEmail, mPassword, memo);
+            if(response.equals("0")){
+                connect.disconnect();
+                db.setCurrentToFalse(current);
+                db.close();
+                Intent disconnect = new Intent(AddMemoActivity.this, LoginActivity.class);
+                startActivity(disconnect);
+                return true;
+            }
+            db.close();
+            System.out.println(response);
+            memo.setId(Integer.parseInt(response));
+            connect.disconnect();
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mAuthTask = null;
+            if (success) {
+                DBHelper db = new DBHelper(AddMemoActivity.this);
+                db.getWritableDatabase();
+                if(isUpdate){
+                    db.modifyAlarm(memo);
+                    db.close();
+                    Intent save = new Intent(AddMemoActivity.this, MainActivity.class);
+                    save.putExtra("Title",memo.getTitle());
+                    startActivity(save);
+
+                }else{
+                    if(db.addAlarm(memo)) {
+                        db.close();
+                        Intent save = new Intent(AddMemoActivity.this, MainActivity.class);
+                        save.putExtra("Title",memo.getTitle());
+                        startActivity(save);
+                    }
+                }
+            } else {
+                Toast.makeText(AddMemoActivity.this,"Error adding memo",Toast.LENGTH_LONG).show();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mAuthTask = null;
+        }
+
     }
 }

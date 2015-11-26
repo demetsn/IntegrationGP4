@@ -39,10 +39,6 @@ public class AlarmService extends IntentService {
         // Sets up the Snooze and Dismiss action buttons that will appear in the
         // expanded view of the notification.
 
-        Intent snoozeIntent = new Intent(this, MemoOverviewActivity.class);
-        //snoozeIntent.setAction("ACTION_SNOOZE");
-        snoozeIntent.putExtra("memoTitle", memo.getTitle());
-        PendingIntent piSnooze = PendingIntent.getService(this, 0, snoozeIntent, 0);
 
         // Constructs the Builder object.
         NotificationCompat.Builder builder =
@@ -51,12 +47,9 @@ public class AlarmService extends IntentService {
                         .setContentTitle(memo.getTitle())
                         .setContentText("Timer has expired !")
                         .setAutoCancel(true)
-                        .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
-                        .addAction (R.drawable.ic_action_plus,
-                                "Snooze", piSnooze);
+                        .setDefaults(Notification.DEFAULT_ALL); // requires VIBRATE permission
 
-        Intent resultIntent = new Intent(this, MemoOverviewActivity.class);
-        resultIntent.putExtra("memoTitle", memo.getTitle());
+        Intent resultIntent = new Intent(this, MainActivity.class);
 
         TaskStackBuilder tsb = TaskStackBuilder.create(this);
         tsb.addParentStack(MemoOverviewActivity.class);
