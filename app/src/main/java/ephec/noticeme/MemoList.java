@@ -281,7 +281,8 @@ public class MemoList extends Fragment {
                             JSONObject oneObject = jArray.getJSONObject(i);
                             String desc = oneObject.getString("desc");
                             String titre = oneObject.getString("title");
-                            String date = oneObject.getString("date");
+
+                            String date = oneObject.getString("date").substring(0,16).replace(' ','&').replace('-','/');
                             double lat = oneObject.getDouble("lat");
                             double longi = oneObject.getDouble("long");
                             int id = oneObject.getInt("id");

@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private float radius = 50;
     private static ArrayList<Alarm> LAlarm ;
-    private static ArrayList<Alarm> AlarmToRestore;
     private LocationManager locManager;
     private RemoveTask mAuthTask;
 
@@ -169,18 +168,6 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if(id == R.id.action_refresh){
-            /*Snackbar.make(
-                    findViewById(android.R.id.content),
-                    "refresh the list with the server",
-                    Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            Fragment newFragment = new MemoList();
-            toolbar.setTitle("Memo List");
-            itemMenu.setVisible(true);
-            transaction.replace(R.id.fragment_container, newFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();*/
             Intent intent = new Intent(this,MainActivity.class);
             intent.putExtra("sync","sync");
             startActivity(intent);
@@ -193,31 +180,6 @@ public class MainActivity extends AppCompatActivity
             User usr = db.getCurrentUSer();
             mAuthTask = new RemoveTask(usr.getMail(),Connector.decrypt(Connector.decrypt(usr.getPassword())));
             mAuthTask.execute((Void)null);
-            /*if(!AlarmToRestore.isEmpty()){
-                Snackbar.make(
-                        findViewById(android.R.id.content),
-                        "Selected item deleted",
-                        Snackbar.LENGTH_LONG)
-                        .setAction("Undo", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                DBHelper db = new DBHelper(v.getContext());
-                                db.getReadableDatabase();
-                                Iterator<Alarm> iterator = AlarmToRestore.iterator();
-                                while(iterator.hasNext()){
-                                    Alarm temp = iterator.next();
-                                    db.addAlarm(temp);
-                                }
-                                db.close();
-                                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                                Fragment newFragment = new MemoList();
-                                transaction.replace(R.id.fragment_container, newFragment);
-                                transaction.addToBackStack(null);
-                                transaction.commit();
-
-                            }
-                        }).show();
-            }*/
             return true;
         }
         if(id == R.id.action_deco){
@@ -404,13 +366,11 @@ public class MainActivity extends AppCompatActivity
         protected Boolean doInBackground(Void... params) {
             DBHelper db = new DBHelper(MainActivity.this);
             db.getReadableDatabase();
-            AlarmToRestore = new ArrayList<>();
             Iterator<Alarm> it = LAlarm.iterator();
             while(it.hasNext()){
                 Connector co = new Connector();
                 if(!co.connect("http://ephecnoticeme.me/app.php/android/removememo")) return false;
                 Alarm temp = it.next();
-                AlarmToRestore.add(temp);
                 String response = co.delMemo(mEmail,mPassword,temp.getId());
                 if(response.equals("ERROR")) return false;
                 if(response.equals("0")){
@@ -427,7 +387,6 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
-
             if (success) {
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 Fragment newFragment = new MemoList();
