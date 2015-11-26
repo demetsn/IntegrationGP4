@@ -45,7 +45,7 @@ public class AlarmService extends IntentService {
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle(memo.getTitle())
-                        .setContentText("Timer has expired !")
+                        .setContentText(memo.getDescription())
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL); // requires VIBRATE permission
 

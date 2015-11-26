@@ -48,7 +48,6 @@ import java.util.List;
 public class MemoList extends Fragment {
 
     private static final int HIGHLIGHT_COLOR = 0x999be6ff;
-    private static int compteur = 0;
 
     private ColorGenerator mColorGenerator = ColorGenerator.MATERIAL;
     private TextDrawable.IBuilder mDrawableBuilder;
@@ -61,14 +60,13 @@ public class MemoList extends Fragment {
         View view = inflater.inflate(R.layout.fragment_memo_list, container, false);
         mDataList = new ArrayList<>();
 
-
-        //ASYNCTASK
-        if(compteur == 0){
-            compteur++;
-            FillMemoTask syncTask = new FillMemoTask(getActivity());
-            syncTask.execute((Void) null);
+        Bundle extras = getArguments();
+        if(extras != null){
+            if(extras.containsKey("sync")){
+                FillMemoTask syncTask = new FillMemoTask(getActivity());
+                syncTask.execute((Void) null);
+            }
         }
-
 
 
         fillMemoList();

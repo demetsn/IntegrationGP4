@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if(id == R.id.action_refresh){
-            Snackbar.make(
+            /*Snackbar.make(
                     findViewById(android.R.id.content),
                     "refresh the list with the server",
                     Snackbar.LENGTH_LONG)
@@ -180,7 +180,10 @@ public class MainActivity extends AppCompatActivity
             itemMenu.setVisible(true);
             transaction.replace(R.id.fragment_container, newFragment);
             transaction.addToBackStack(null);
-            transaction.commit();
+            transaction.commit();*/
+            Intent intent = new Intent(this,MainActivity.class);
+            intent.putExtra("sync","sync");
+            startActivity(intent);
             return true;
         }
         if(id == R.id.action_delete){

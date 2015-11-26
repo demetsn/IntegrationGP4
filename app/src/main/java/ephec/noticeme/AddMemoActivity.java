@@ -360,11 +360,13 @@ public class AddMemoActivity extends AppCompatActivity
                 db.close();
                 Intent disconnect = new Intent(AddMemoActivity.this, LoginActivity.class);
                 startActivity(disconnect);
-                return true;
+                return false;
             }
             db.close();
             System.out.println(response);
-            memo.setId(Integer.parseInt(response));
+            if(!isUpdate){
+                memo.setId(Integer.parseInt(response));
+            }
             connect.disconnect();
             return true;
         }

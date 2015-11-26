@@ -368,7 +368,6 @@ public class DBHelper extends SQLiteOpenHelper
 
         db.update(TABLE_ALARMS, values, COlUMN_ID + "= \"" + alarm.getId() + "\"", null);
 
-        db.close();
         result = true;
         return result;
     }

@@ -107,12 +107,13 @@ public class Connector {
     public String addMemo(String mEmail, String mPassword, Alarm memo){
         String response = "";
         try{
+            System.out.println("ID IDI IDDIIDIDIDI : "+memo.getAlarmDate());
             String crypted = encrypt(mPassword);
             Uri.Builder builder = new Uri.Builder().appendQueryParameter("username",mEmail)
                     .appendQueryParameter("password", crypted)
                     .appendQueryParameter("title",memo.getTitle())
                     .appendQueryParameter("description",memo.getDescription())
-                    .appendQueryParameter("date",""+memo.getAlarmDate())
+                    .appendQueryParameter("date",""+memo.getAlarmDate().replace('&',' '))
                     .appendQueryParameter("latitude",""+memo.getLatitude())
                     .appendQueryParameter("longitude",""+memo.getLongitude())
                     .appendQueryParameter("idmemo", "" + memo.getId());
