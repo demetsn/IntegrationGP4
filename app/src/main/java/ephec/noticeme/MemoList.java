@@ -87,7 +87,7 @@ public class MemoList extends Fragment {
         db.getWritableDatabase();
         User usr = db.getCurrentUSer();
         db.close();
-        ArrayList<Alarm> memos = db.getAllAlarm(usr.getId());
+        ArrayList<Alarm> memos = db.getAllAlarm();
         Iterator<Alarm> it = memos.iterator();
         while(it.hasNext()){
             Alarm temp = it.next();
