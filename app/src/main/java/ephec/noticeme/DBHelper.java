@@ -280,25 +280,12 @@ public class DBHelper extends SQLiteOpenHelper
     }
 
     public boolean deleteAllAlarm() {
-        boolean result = false;
-
-        String query = "Select * FROM " + TABLE_ALARMS;
-
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        Cursor cursor = db.rawQuery(query, null);
-        Alarm alarm = new Alarm();
-
-        if (cursor.moveToFirst()) {
-            while (cursor.isAfterLast() == false) {
-                alarm.setId((cursor.getInt(cursor.getColumnIndex(COlUMN_ID))));
-                db.delete(TABLE_ALARMS, COlUMN_ID + " = ?",
-                        new String[]{String.valueOf(alarm.getId())});
-            }
-        }
-        cursor.close();
-
+        //db.execSQL("delete from "+ TABLE_ALARMS);
+        db.delete(TABLE_ALARMS,null,null);
+        db.close();
         return true;
     }
 

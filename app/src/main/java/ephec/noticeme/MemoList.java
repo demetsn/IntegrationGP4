@@ -52,6 +52,8 @@ public class MemoList extends Fragment {
     private ColorGenerator mColorGenerator = ColorGenerator.MATERIAL;
     private TextDrawable.IBuilder mDrawableBuilder;
     private ArrayList<ListData> mDataList;
+    private FillMemoTask mAuthTask;
+    private ListView listView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,21 +65,22 @@ public class MemoList extends Fragment {
         Bundle extras = getArguments();
         if(extras != null){
             if(extras.containsKey("sync")){
+                System.out.println("Je suis dans le cas d'un sync dans memoList");
                 DBHelper db = new DBHelper(getContext());
                 db.getWritableDatabase();
                 db.deleteAllAlarm();
+                System.out.println("Apres del alarm");
                 db.close();
-                FillMemoTask syncTask = new FillMemoTask(getActivity());
-                syncTask.execute((Void) null);
+                mAuthTask = new FillMemoTask(getActivity());
+                mAuthTask.execute((Void) null);
+                System.out.println("Apres asynctask");
             }
         }
-
-
         fillMemoList();
         MainActivity.clearList();
         mDrawableBuilder = TextDrawable.builder()
                 .round();
-        ListView listView = (ListView) view.findViewById(R.id.listView);
+        listView = (ListView) view.findViewById(R.id.listView);
 
         listView.setAdapter(new SampleAdapter());
 
@@ -245,79 +248,59 @@ public class MemoList extends Fragment {
         protected Boolean doInBackground(Void... params) {
             Connector co = new Connector();
             if(!co.connect("http://ephecnoticeme.me/app.php/android/memolist")) return false;
-            String mail = "";
-            String pass = "";
-            DBHelper db1 = new DBHelper(context);
-            db1.getWritableDatabase();
-            User usr = db1.getCurrentUSer();
-            mail = usr.getMail();
-            pass = Connector.decrypt(Connector.decrypt(usr.getPassword()));
-            System.out.println(mail);
-            System.out.println(pass);
-
-            String response = co.login(mail,pass);
-            System.out.println("reponse : "+response);
+            DBHelper db = new DBHelper(context);
+            db.getWritableDatabase();
+            User usr = db.getCurrentUSer();
+            String response = co.login(usr.getMail(),Connector.decrypt(Connector.decrypt(usr.getPassword())));
             if(response.equals("0")){
-                db1.setCurrentToFalse(usr);
-                db1.close();
+                db.setCurrentToFalse(usr);
+                db.close();
                 co.disconnect();
+                System.out.println("Error login !");
                 Intent intent = new Intent(context, LoginActivity.class);
                 startActivity(intent);
-                System.out.println("Je suis ici mais le log est ok");
                 return false;
             }else{
                 response = android.text.Html.fromHtml(response).toString();
-                System.out.println("responce : "+response);
-                DBHelper db = new DBHelper(context);
-                db.getWritableDatabase();
                 try{
                     JSONObject obj = new JSONObject(response);
                     JSONArray jArray = obj.getJSONArray("json");
-                    for (int i=0; i < jArray.length(); i++)
-                    {
-                        try{
-                            JSONObject oneObject = jArray.getJSONObject(i);
-                            String desc = oneObject.getString("desc");
-                            String titre = oneObject.getString("title");
-
-                            String date = oneObject.getString("date").substring(0,16).replace(' ','&').replace('-','/');
-                            double lat = oneObject.getDouble("lat");
-                            double longi = oneObject.getDouble("long");
-                            int id = oneObject.getInt("id");
-                            Alarm temp = new Alarm();
-                            temp.setId(id);
-                            temp.setLatitude(lat);
-                            temp.setLongitude(longi);
-                            temp.setDescription(desc);
-                            temp.setTitle(titre);
-                            temp.setAlarmDate(date.replace(' ', '&'));
-                            db.addAlarm(temp);
-                            mDataList.add(new ListData(temp));
-
-                        }catch (SQLiteConstraintException e){
-
-                        }
+                    for (int i=0; i < jArray.length(); i++) {
+                        JSONObject oneObject = jArray.getJSONObject(i);
+                        String desc = oneObject.getString("desc");
+                        String titre = oneObject.getString("title");
+                        String date = oneObject.getString("date").substring(0,16).replace(' ','&').replace('-','/');
+                        double lat = oneObject.getDouble("lat");
+                        double longi = oneObject.getDouble("long");
+                        int id = oneObject.getInt("id");
+                        Alarm temp = new Alarm();
+                        temp.setId(id);
+                        temp.setLatitude(lat);
+                        temp.setLongitude(longi);
+                        temp.setDescription(desc);
+                        temp.setTitle(titre);
+                        temp.setAlarmDate(date.replace(' ', '&'));
+                        db.addAlarm(temp);
+                        mDataList.add(new ListData(temp));
                     }
 
                 }catch (Exception e){
-                    //TODO AFFICHER TOAST ERREUR CO SERVER
                     db.close();
                     co.disconnect();
                     return false;
                 }
-                db.close();
             }
+            db.close();
             co.disconnect();
             return true;
         }
         @Override
         protected void onPostExecute(final Boolean success) {
+            mAuthTask = null;
             if (success) {
-                Intent intent= new Intent(MemoList.this.getContext(),MainActivity.class);
-                startActivity(intent);
-                //finish();
+                listView.setAdapter(new SampleAdapter());
             } else {
-
+                Toast.makeText(context,"Cannot refrsh with the server",Toast.LENGTH_LONG).show();
             }
         }
     }

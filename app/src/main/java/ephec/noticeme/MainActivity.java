@@ -168,10 +168,9 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if(id == R.id.action_refresh){
-            //TODO handle this button
-            /*Intent intent = new Intent(this,LoginActivity.class);
+            Intent intent = new Intent(this,MainActivity.class);
             intent.putExtra("sync","sync");
-            startActivity(intent);*/
+            startActivity(intent);
             return true;
         }
         if(id == R.id.action_delete){
