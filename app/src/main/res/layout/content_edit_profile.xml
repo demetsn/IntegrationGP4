@@ -18,6 +18,7 @@
         android:layout_marginTop="5dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
+        android:inputType="textPersonName"
         android:layout_alignParentStart="true" />
 
     <EditText
@@ -28,6 +29,7 @@
         android:textColorHint="@color/lightGrey"
         android:layout_below="@+id/editProfileName"
         android:layout_marginTop="5dp"
+        android:inputType="textPersonName"
         android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true" />
 
@@ -39,6 +41,7 @@
         android:textColorHint="@color/lightGrey"
         android:layout_below="@+id/editProfileFirstname"
         android:layout_marginTop="5dp"
+        android:inputType="textEmailAddress"
         android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true" />
 </RelativeLayout>

@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -33,6 +34,9 @@ public class EditProfile extends AppCompatActivity {
     private String actualFisrtname = "";
     private String actualEmail = "";
     private EditProfileTask ept;
+
+    private MenuItem itemMenu1;
+    private MenuItem itemMenu2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +63,8 @@ public class EditProfile extends AppCompatActivity {
                 name.setEnabled(true);
                 firstname.setEnabled(true);
                 email.setEnabled(true);
+                itemMenu1.setVisible(true);
+                itemMenu2.setVisible(true);
                 fab.setVisibility(View.INVISIBLE);
             }
         });
@@ -80,6 +86,10 @@ public class EditProfile extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.add_memo_menu, menu);
+        itemMenu1 = menu.findItem(R.id.action_cancel);
+        itemMenu2 = menu.findItem(R.id.action_done);
+        itemMenu1.setVisible(false);
+        itemMenu2.setVisible(false);
         return true;
     }
 
@@ -100,6 +110,8 @@ public class EditProfile extends AppCompatActivity {
                 name.setEnabled(false);
                 firstname.setEnabled(false);
                 email.setEnabled(false);
+                itemMenu1.setVisible(false);
+                itemMenu2.setVisible(false);
                 fab.setVisibility(View.VISIBLE);
                 return true;
 
@@ -110,6 +122,8 @@ public class EditProfile extends AppCompatActivity {
                 name.setEnabled(false);
                 firstname.setEnabled(false);
                 email.setEnabled(false);
+                itemMenu1.setVisible(false);
+                itemMenu2.setVisible(false);
                 fab.setVisibility(View.VISIBLE);
                 return true;
             case R.id.action_deco:
