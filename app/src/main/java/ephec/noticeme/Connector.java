@@ -183,26 +183,6 @@ public class Connector {
         }
         return true;
     }
-    public ArrayList<User> getUser(String mail){
-        //TODO
-        return null;
-    }
-    public boolean setUser(User user){
-        //TODO
-        return false;
-    }
-    public boolean addMemo(Alarm memo){
-        //TODO recuperer l'id du server
-        return false;
-    }
-    public boolean removeMemo(Alarm memo){
-        //TODO
-        return false;
-    }
-    public ArrayList<Alarm> getMemo(){
-        //TODO
-        return null;
-    }
 
     public static String encrypt(String input){
         String key = "Notice Me Sempai";

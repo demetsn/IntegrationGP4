@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,10 +29,10 @@ public class EditProfile extends AppCompatActivity {
     private User modifUser;
 
     private FloatingActionButton fab;
-    private static int compteur = 0;
     private String actualName = "";
     private String actualFisrtname = "";
     private String actualEmail = "";
+    private EditProfileTask ept;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +42,6 @@ public class EditProfile extends AppCompatActivity {
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            // Show the Up button in the action bar.
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
@@ -68,15 +68,12 @@ public class EditProfile extends AppCompatActivity {
         current = db.getCurrentUSer();
         db.close();
 
-        actualName = current.getNom();
-        actualFisrtname = current.getPrenom();
-        actualEmail = current.getMail();
+        if(current.getNom() != null) actualName = current.getNom();
+        if(current.getPrenom() != null) actualFisrtname = current.getPrenom();
+        if(current.getMail() != null) actualEmail = current.getMail();
 
-        if(compteur==0){
-            EditProfileTask task = new EditProfileTask(this,false);
-            task.execute((Void)null);
-        }
-
+        ept = new EditProfileTask(this,false);
+        ept.execute();
     }
 
     @Override
@@ -98,11 +95,15 @@ public class EditProfile extends AppCompatActivity {
                 modifUser.setMail(email.getText().toString());
                 modifUser.setNom(name.getText().toString());
                 modifUser.setPrenom(firstname.getText().toString());
-                //TODO ASYNCTASK
+                ept = new EditProfileTask(this,true);
+                ept.execute();
+                name.setEnabled(false);
+                firstname.setEnabled(false);
+                email.setEnabled(false);
+                fab.setVisibility(View.VISIBLE);
                 return true;
 
             case R.id.action_cancel:
-
                 name.setText(actualName);
                 firstname.setText(actualFisrtname);
                 email.setText(actualEmail);
@@ -123,6 +124,7 @@ public class EditProfile extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
     private class EditProfileTask extends AsyncTask<Void, Void, Boolean> {
         private Context context;
         private boolean isEdit;
@@ -149,69 +151,62 @@ public class EditProfile extends AppCompatActivity {
                 return true;
 
             }else{
-                if (!connect.connect("http://ephecnoticeme.me/app.php/android/getuser")) {
+                connect.connect("http://ephecnoticeme.me/app.php/android/getuser");
+                String answer = connect.login(actualEmail, Connector.decrypt(Connector.decrypt(current.getPassword())));
+                if (answer.equals("0")) {
                     connect.disconnect();
+                    db.setCurrentToFalse(current);
+                    db.close();
+
+                    return false;
                 } else {
-                    String answer = connect.login(actualEmail, Connector.decrypt(Connector.decrypt(current.getPassword())));
-                    if (answer.equals("0")) {
-                        connect.disconnect();
-                        db.setCurrentToFalse(current);
-                        db.close();
-                        return false;
-                    } else {
-                        answer = android.text.Html.fromHtml(answer).toString();
-                        System.out.println("responce : "+answer);
-                        //DBHelper db = new DBHelper(context);
-                        //db.getWritableDatabase();
-                        try {
-                            JSONObject obj = new JSONObject(answer);
-                            JSONArray jArray = obj.getJSONArray("json");
-                            for (int i = 0; i < jArray.length(); i++) {
-                                try {
-                                    JSONObject oneObject = jArray.getJSONObject(i);
-
-                                    actualName = oneObject.getString("lastname");
-                                    actualFisrtname = oneObject.getString("firstname");
-                                    int id = current.getId();
-                                    User usr = new User();
-                                    usr.setId(id);
-                                    usr.setNom(actualName);
-                                    usr.setPrenom(actualFisrtname);
-                                    usr.setMail(actualEmail);
-
-                                    db.modifyUser(usr);
-
-                                } catch (SQLiteConstraintException e) {
-
-                                }
-                            }
-                        } catch (Exception e) {
-                            db.setCurrentToFalse(current);
-                            db.close();
-                            connect.disconnect();
-                            return false;
+                    answer = android.text.Html.fromHtml(answer).toString();
+                    System.out.println("responce : "+answer);
+                    try {
+                        JSONObject obj = new JSONObject(answer);
+                        JSONArray jArray = obj.getJSONArray("json");
+                        for (int i = 0; i < jArray.length(); i++) {
+                            JSONObject oneObject = jArray.getJSONObject(i);
+                            actualName = oneObject.getString("lastname");
+                            actualFisrtname = oneObject.getString("firstname");
+                            int id = current.getId();
+                            User usr = new User();
+                            usr.setId(id);
+                            usr.setNom(actualName);
+                            usr.setPrenom(actualFisrtname);
+                            usr.setMail(actualEmail);
+                            db.modifyUser(usr);
                         }
+                    } catch (Exception e) {
+                        Toast.makeText(context,"Error while reading your information",Toast.LENGTH_LONG).show();
                         db.close();
+                        connect.disconnect();
+                        return true;
                     }
+                    db.close();
+                    connect.disconnect();
                 }
+                return true;
             }
-            return true;
         }
         @Override
         protected void onPostExecute(final Boolean success) {
+            ept = null;
             if (success) {
                 if(isEdit){
-                    Intent intent= new Intent(context,MainActivity.class);
-                    startActivity(intent);
+                    Toast.makeText(context,"Your information are up to date",Toast.LENGTH_LONG).show();
                 }else{
                     name.setText(actualName);
                     firstname.setText(actualFisrtname);
                     email.setText(actualEmail);
-                    finish();
                 }
 
             } else {
                 Intent disconnect = new Intent(context, LoginActivity.class);
+                DBHelper db = new DBHelper(context);
+                db.getWritableDatabase();
+                db.setCurrentToFalse(current);
+                db.close();
                 startActivity(disconnect);
             }
         }
