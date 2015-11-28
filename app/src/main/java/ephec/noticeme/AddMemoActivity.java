@@ -60,6 +60,7 @@ public class AddMemoActivity extends AppCompatActivity
     private boolean isUpdate;
     private int id;
     private AddTask mAuthTask;
+    private String address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,7 +169,6 @@ public class AddMemoActivity extends AppCompatActivity
                 }else{
                     memo.setId(this.id);
                 }
-                //TODO ASYNCTASK
                 DBHelper db = new DBHelper(this);
                 db.getWritableDatabase();
                 User usr = db.getCurrentUSer();
@@ -223,10 +223,11 @@ public class AddMemoActivity extends AppCompatActivity
                         System.out.println(e);
                     }
                     try{
+                        address = addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality();
                         mMarker = mMap.addMarker(new MarkerOptions()
                                         .position(loc)
                                         .title("Tap the screen to update location")
-                                        .snippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality())
+                                        .snippet(address)
                                         .draggable(true)
                         );
                         mMarker.showInfoWindow();
@@ -353,7 +354,7 @@ public class AddMemoActivity extends AppCompatActivity
             DBHelper db = new DBHelper(AddMemoActivity.this);
             db.getWritableDatabase();
             User current = db.getCurrentUSer();
-            String response = connect.addMemo(mEmail, mPassword, memo);
+            String response = connect.addMemo(mEmail, mPassword, memo,address);
             if(response.equals("0")){
                 connect.disconnect();
                 db.setCurrentToFalse(current);

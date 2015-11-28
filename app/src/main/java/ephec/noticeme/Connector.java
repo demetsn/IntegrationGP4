@@ -104,7 +104,7 @@ public class Connector {
         }
         return  response;
     }
-    public String addMemo(String mEmail, String mPassword, Alarm memo){
+    public String addMemo(String mEmail, String mPassword, Alarm memo, String adresse){
         String response = "";
         try{
             System.out.println("ID IDI IDDIIDIDIDI : "+memo.getAlarmDate());
@@ -116,7 +116,8 @@ public class Connector {
                     .appendQueryParameter("date",""+memo.getAlarmDate().replace('&',' '))
                     .appendQueryParameter("latitude",""+memo.getLatitude())
                     .appendQueryParameter("longitude",""+memo.getLongitude())
-                    .appendQueryParameter("idmemo", "" + memo.getId());
+                    .appendQueryParameter("idmemo", "" + memo.getId())
+                    .appendQueryParameter("address", "" + adresse);
 
             String query = builder.build().getEncodedQuery();
             OutputStream os = conn.getOutputStream();
