@@ -19,9 +19,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.ScrollView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -41,8 +43,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-//TODO BUG SI AJOUT JUSTE DE DATE OU JUSTE TIME
-//TODO AMELIORER L INTERFACE AVEC AJOUT DE LA DATE FACULTATIVE VIA UN LISTENER SUR TEXTVIEW
 public class AddMemoActivity extends AppCompatActivity
         implements
         View.OnClickListener,
@@ -61,6 +61,7 @@ public class AddMemoActivity extends AppCompatActivity
     private int id;
     private AddTask mAuthTask;
     private String address;
+    private Switch sw;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +80,26 @@ public class AddMemoActivity extends AppCompatActivity
         this.time = (TextView) this.findViewById(R.id.memo_textTime);
         this.time.setOnClickListener(this);
         this.isUpdate = false;
+        this.sw = (Switch) findViewById(R.id.switch1);
+        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    date.setVisibility(View.VISIBLE);
+                    time.setVisibility(View.VISIBLE);
+                    String actualTime = getActualTime();
+                    date.setText(actualTime.split("&")[0]);
+                    time.setText(actualTime.split("&")[1]);
+                }else{
+                    date.setVisibility(View.INVISIBLE);
+                    time.setVisibility(View.INVISIBLE);
+                    date.setText("");
+                    time.setText("");
+                }
+            }
+        });
+        date.setVisibility(View.INVISIBLE);
+        time.setVisibility(View.INVISIBLE);
 
         Bundle extras = getIntent().getExtras();
         String alarmTitle = "";
@@ -173,7 +194,7 @@ public class AddMemoActivity extends AppCompatActivity
                 db.getWritableDatabase();
                 User usr = db.getCurrentUSer();
                 mAuthTask = new AddTask(usr.getMail(),Connector.decrypt(Connector.decrypt(usr.getPassword())),memo);
-                mAuthTask.execute((Void)null);
+                mAuthTask.execute((Void) null);
                 db.close();
 
                 return true;
