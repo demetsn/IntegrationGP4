@@ -350,8 +350,31 @@ public class AddMemoActivity extends AppCompatActivity
         int today = cal.get(Calendar.DAY_OF_MONTH);
         int thisHour = cal.get(Calendar.HOUR_OF_DAY);
         int thisMinute = cal.get(Calendar.MINUTE);
+        String m;
+        String d;
+        if(today<10){
+            d = "0"+today;
+        }else{
+            d = ""+today;
+        }if(thisMonth<10){
+            m = "0"+(thisMonth + 1);
+        }else{
+            m = ""+(thisMonth + 1);
+        }
+        String SHours;
+        String SMinutes;
+        if(thisHour<10){
+            SHours="0"+thisHour;
+        }else{
+            SHours=""+thisHour;
+        }
+        if(thisMinute<10){
+            SMinutes="0"+thisMinute;
+        }else{
+            SMinutes=""+thisMinute;
+        }
 
-        now = thisYear+"/"+thisMonth+"/"+today+"&"+thisHour+":"+thisMinute;
+        now = thisYear+"/"+m+"/"+d+"&"+SHours+":"+SMinutes;
 
         return now;
     }

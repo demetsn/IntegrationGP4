@@ -1,59 +1,50 @@
 package ephec.noticeme;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
+
+import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteConstraintException;
 import android.graphics.Color;
-import android.net.Uri;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.util.JsonReader;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
-
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Iterator;
-import java.util.List;
 
 public class MemoList extends Fragment {
 
     private static final int HIGHLIGHT_COLOR = 0x999be6ff;
+    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 15000 ;//en millisecondes
+    private static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 50;
 
     private ColorGenerator mColorGenerator = ColorGenerator.MATERIAL;
     private TextDrawable.IBuilder mDrawableBuilder;
     private ArrayList<ListData> mDataList;
     private FillMemoTask mAuthTask;
     private ListView listView;
+    private LocationManager locManager;
+    private float radius = 50;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,6 +52,17 @@ public class MemoList extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_memo_list, container, false);
         mDataList = new ArrayList<>();
+        locManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        locManager.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER,
+                MINIMUM_TIME_BETWEEN_UPDATE,
+                MINIMUM_DISTANCECHANGE_FOR_UPDATE,
+                new myLocationListener());
+        locManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                MINIMUM_TIME_BETWEEN_UPDATE,
+                MINIMUM_DISTANCECHANGE_FOR_UPDATE,
+                new myLocationListener());
 
         Bundle extras = getArguments();
         if(extras != null){
@@ -75,7 +77,13 @@ public class MemoList extends Fragment {
                 mAuthTask.execute((Void) null);
                 System.out.println("Apres asynctask");
             }
+            if(extras.containsKey("Title")){
+                launchMemoAlarms(extras.getString("Title"));
+            }
         }
+
+
+
         fillMemoList();
         MainActivity.clearList();
         mDrawableBuilder = TextDrawable.builder()
@@ -98,6 +106,81 @@ public class MemoList extends Fragment {
         }
 
     }
+
+    public void launchMemoAlarms(String title){
+        DBHelper db = new DBHelper(getContext());
+        db.getReadableDatabase();
+        Alarm memo = db.getAlarm(title);
+        db.close();
+
+        if(!memo.getAlarmDate().equals("&")){
+            setTimedAlert(memo);
+        }
+        setProximityAlert(memo);
+    }
+    @SuppressLint("NewApi")
+    private void setTimedAlert(Alarm memo) {
+        Intent intentAlarm = new Intent(getContext(),AlarmReceiver.class);
+        intentAlarm.putExtra("memoTitle", memo.getTitle());
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), memo.getId()-(2*memo.getId()), intentAlarm, 0);
+
+        AlarmManager manager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
+        manager.setExact(AlarmManager.RTC_WAKEUP, getTime(memo), pendingIntent);
+    }
+    public long getTime(Alarm memo) {
+        int year;
+        int month;
+        int day;
+        int hour;
+        int minute;
+
+        String[] dueAlarm = memo.getAlarmDate().split("&");
+        String[] date = dueAlarm[0].split("/");
+        String[] hours = dueAlarm[1].split(":");
+
+        year = Integer.parseInt(date[0]);
+        month = Integer.parseInt(date[1])-1;
+        day = Integer.parseInt(date[2]);
+
+        hour = Integer.parseInt(hours[0]);
+        minute = Integer.parseInt(hours[1]);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(year, month, day, hour, minute, 0);
+
+        return calendar.getTimeInMillis();
+    }
+    private void setProximityAlert(Alarm memo) {
+        Intent intent = new Intent(getContext(), GeoReceiver.class);
+        intent.putExtra("memoTitle", memo.getTitle());
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
+    }
+    public class myLocationListener implements LocationListener {
+
+        @Override
+        public void onLocationChanged(Location location) {
+
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    }
+
 
     private class SampleAdapter extends BaseAdapter {
 
@@ -236,7 +319,6 @@ public class MemoList extends Fragment {
         }
     }
 
-
     private class FillMemoTask extends AsyncTask<Void, Void, Boolean> {
         private Context context;
 
@@ -300,7 +382,7 @@ public class MemoList extends Fragment {
             if (success) {
                 listView.setAdapter(new SampleAdapter());
             } else {
-                Toast.makeText(context,"Cannot refrsh with the server",Toast.LENGTH_LONG).show();
+                Toast.makeText(context,"Cannot refresh with the server",Toast.LENGTH_LONG).show();
             }
         }
     }

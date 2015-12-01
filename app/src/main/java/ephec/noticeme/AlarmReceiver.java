@@ -19,14 +19,11 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent intent) {
 
-
         Bundle extras = intent.getExtras();
         Intent service = new Intent(context,AlarmService.class);
         service.putExtra("memoTitle", extras.getString("memoTitle"));
         startWakefulService(context, service);
         //startWakefulService(context, (intent.setComponent(comp)));
         setResultCode(Activity.RESULT_OK);
-
-
     }
 }

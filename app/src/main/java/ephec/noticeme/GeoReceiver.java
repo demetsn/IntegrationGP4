@@ -6,10 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
-/**
- * Created by Thrag on 23-11-15.
- */
 public class GeoReceiver extends WakefulBroadcastReceiver {
+
     @Override
     public void onReceive(final Context context, Intent intent) {
 

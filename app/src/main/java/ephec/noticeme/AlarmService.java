@@ -30,24 +30,17 @@ public class AlarmService extends IntentService {
         }
     }
 
-    //TODO BUTTON SNOOZE
-
     public void launchNotification(Alarm memo){
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(NOTIFICATION_SERVICE);
 
-        // Sets up the Snooze and Dismiss action buttons that will appear in the
-        // expanded view of the notification.
-
-
-        // Constructs the Builder object.
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle(memo.getTitle())
                         .setContentText(memo.getDescription())
                         .setAutoCancel(true)
-                        .setDefaults(Notification.DEFAULT_ALL); // requires VIBRATE permission
+                        .setDefaults(Notification.DEFAULT_ALL);
 
         Intent resultIntent = new Intent(this, MainActivity.class);
 
@@ -56,8 +49,6 @@ public class AlarmService extends IntentService {
         tsb.addNextIntent(resultIntent);
 
         PendingIntent resultPendingIntent = tsb.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
-        //PendingIntent resultPendingIntent =
-        //        PendingIntent.getActivity(this, 0, resultIntent, 0);
 
         builder.setContentIntent(resultPendingIntent);
         mNotificationManager.notify(memo.getId(), builder.build());

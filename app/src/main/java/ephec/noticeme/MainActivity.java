@@ -1,30 +1,13 @@
 package ephec.noticeme;
 
-import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NotificationCompat;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -32,33 +15,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.gcm.Task;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
-
-//TODO BUG QUAND ON CHANGE DE USER
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
-    private final String PROX_ALERT_INTENT = "ephec.noticeme";
-    private static final long MINIMUM_TIME_BETWEEN_UPDATE = 15000 ;//en millisecondes
-    private static final float MINIMUM_DISTANCECHANGE_FOR_UPDATE = 50;
     public static FragmentManager fragmentManager;
     private MenuItem itemMenu;
     private Toolbar toolbar;
-    private float radius = 50;
     private static ArrayList<Alarm> LAlarm ;
-    private LocationManager locManager;
     private RemoveTask mAuthTask;
 
     @Override
@@ -69,17 +39,6 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Memo List");
         LAlarm = new ArrayList<>();
-
-        locManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MINIMUM_TIME_BETWEEN_UPDATE, MINIMUM_DISTANCECHANGE_FOR_UPDATE, new myLocationListener());
-        locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MINIMUM_TIME_BETWEEN_UPDATE, MINIMUM_DISTANCECHANGE_FOR_UPDATE, new myLocationListener());
-
-        Bundle extras = getIntent().getExtras();
-        if(extras != null){
-            if(extras.containsKey("Title")){
-                launchMemoAlarms(extras.getString("Title"));
-            }
-        }
 
         TextView userTxtView = (TextView)findViewById(R.id.username);
 
@@ -178,7 +137,7 @@ public class MainActivity extends AppCompatActivity
             db.getWritableDatabase();
             User usr = db.getCurrentUSer();
             mAuthTask = new RemoveTask(usr.getMail(),Connector.decrypt(Connector.decrypt(usr.getPassword())));
-            mAuthTask.execute((Void)null);
+            mAuthTask.execute((Void) null);
             return true;
         }
         if(id == R.id.action_deco){
@@ -236,63 +195,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void launchMemoAlarms(String title){
-        DBHelper db = new DBHelper(this.getApplicationContext());
-        db.getReadableDatabase();
-
-        Alarm memo = db.getAlarm(title);
-        db.close();
-        if(!memo.getAlarmDate().equals("&")){
-            setTimedAlert(memo);
-        }
-        setProximityAlert(memo);
-    }
-
-    @SuppressLint("NewApi")
-    private void setTimedAlert(Alarm memo) {
-        Intent intentAlarm = new Intent(this,AlarmReceiver.class);
-        intentAlarm.putExtra("memoTitle", memo.getTitle());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId()-(2*memo.getId()), intentAlarm, 0);
-
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        manager.setExact(AlarmManager.RTC_WAKEUP, getTime(memo), pendingIntent);
-    }
-
-    public long getTime(Alarm memo) {
-        int year;
-        int month;
-        int day;
-        int hour;
-        int minute;
-
-        String[] dueAlarm = memo.getAlarmDate().split("&");
-        String[] date = dueAlarm[0].split("/");
-        String[] hours = dueAlarm[1].split(":");
-
-        year = Integer.parseInt(date[0]);
-        month = Integer.parseInt(date[1])-1;
-        day = Integer.parseInt(date[2]);
-
-        hour = Integer.parseInt(hours[0]);
-        minute = Integer.parseInt(hours[1]);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(year, month, day, hour, minute, 0);
-
-        return calendar.getTimeInMillis();
-    }
-
-    private void setProximityAlert(Alarm memo) {
-
-        Intent intent = new Intent(this, GeoReceiver.class);
-
-        intent.putExtra("memoTitle", memo.getTitle());
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
-    }
 
     public static void addAlarm(Alarm alarm){
         LAlarm.add(alarm);
@@ -302,53 +204,6 @@ public class MainActivity extends AppCompatActivity
     }
     public static void clearList(){
         LAlarm = new ArrayList<>();
-    }
-
-    public class myLocationListener implements LocationListener {
-
-        @Override
-        public void onLocationChanged(Location location) {
-
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-
-        }
-    }
-
-    public class myBroadcastReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context c, Intent i) {
-
-            Intent intentAlarm = new Intent(getApplicationContext(),AlarmService.class);
-            intentAlarm.putExtra("memoTitle", i.getExtras().getString("memoTitle"));
-            startActivity(intentAlarm);
-        }
-    }
-
-    public void relaunchAlarms() {
-        DBHelper db = new DBHelper(this.getApplicationContext());
-        db.getReadableDatabase();
-
-        ArrayList<Alarm> memos = db.getAllAlarm();
-        int j = 0;
-        while (memos.size() > j) {
-            launchMemoAlarms(memos.get(j).getTitle());
-            j++;
-        }
-        db.close();
     }
 
     public class RemoveTask extends AsyncTask<Void, Void, Boolean> {

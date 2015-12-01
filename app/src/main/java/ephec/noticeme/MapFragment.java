@@ -35,7 +35,6 @@ public class MapFragment extends Fragment {
 
     MapView mMapView;
     private GoogleMap mMap;
-    //private Geocoder geocode;
     public static int markerCount = 0;
 
 
