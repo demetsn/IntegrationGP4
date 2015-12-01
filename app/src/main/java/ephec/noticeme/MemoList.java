@@ -380,6 +380,15 @@ public class MemoList extends Fragment {
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             if (success) {
+                DBHelper db = new DBHelper(context);
+                db.getWritableDatabase();
+                ArrayList<Alarm> array = db.getAllAlarm();
+                Iterator<Alarm> it = array.iterator();
+                while(it.hasNext()){
+                    Alarm temp = it.next();
+                    launchMemoAlarms(temp.getTitle());
+                }
+                db.close();
                 listView.setAdapter(new SampleAdapter());
             } else {
                 Toast.makeText(context,"Cannot refresh with the server",Toast.LENGTH_LONG).show();
