@@ -120,12 +120,18 @@ public class MemoList extends Fragment {
     }
     @SuppressLint("NewApi")
     private void setTimedAlert(Alarm memo) {
-        Intent intentAlarm = new Intent(getContext(),AlarmReceiver.class);
-        intentAlarm.putExtra("memoTitle", memo.getTitle());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), memo.getId()-(2*memo.getId()), intentAlarm, 0);
 
-        AlarmManager manager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
-        manager.setExact(AlarmManager.RTC_WAKEUP, getTime(memo), pendingIntent);
+        long time = System.currentTimeMillis();
+        long memoTime = getTime(memo);
+
+        if(time < memoTime) {
+            Intent intentAlarm = new Intent(getContext(), AlarmReceiver.class);
+            intentAlarm.putExtra("memoTitle", memo.getTitle());
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), memo.getId() - (2 * memo.getId()), intentAlarm, 0);
+
+            AlarmManager manager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
+            manager.setExact(AlarmManager.RTC_WAKEUP, getTime(memo), pendingIntent);
+        }
     }
     public long getTime(Alarm memo) {
         int year;
