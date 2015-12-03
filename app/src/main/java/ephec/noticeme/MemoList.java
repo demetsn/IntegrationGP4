@@ -160,7 +160,7 @@ public class MemoList extends Fragment {
     private void setProximityAlert(Alarm memo) {
         Intent intent = new Intent(getContext(), GeoReceiver.class);
         intent.putExtra("memoTitle", memo.getTitle());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), memo.getId(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), memo.getId(), intent, PendingIntent.FLAG_ONE_SHOT);
 
         locManager.addProximityAlert(memo.getLatitude(), memo.getLongitude(), radius, -1, pendingIntent);
     }
