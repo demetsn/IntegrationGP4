@@ -267,6 +267,7 @@ public class AddMemoActivity extends AppCompatActivity
                 List<Address> addresses = null;
                 try{
                     addresses = geocode.getFromLocation(latLng.latitude, latLng.longitude,1);
+                    address = addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality();
                     mMarker.setPosition(latLng);
                     mMarker.setSnippet(addresses.get(0).getAddressLine(0)+", "+addresses.get(0).getLocality());
                     mMarker.showInfoWindow();
